@@ -10,7 +10,10 @@ class MqttDispositivo:
     """Clase responsable de la conexión y configuración MQTT"""
 
     def __init__(self):
-        self.TOPICS = ["sensor/data/sen55", "sensor/data/gas_sensor"]
+        # Topics base que SIEMPRE queremos suscribir
+        self.BASE_TOPICS = ["sensor/data/sen55", "sensor/data/gas_sensor"]
+        self.TOPICS = []
+        
         # Debug Options
         self.debug = True
         self.auto_reconnect = True
@@ -18,6 +21,8 @@ class MqttDispositivo:
 
         # MQTT Settings
         self.mqtt_broker = "mqtt.meshtastic.org"
+        self.meshtastic_broker = "mqtt.meshtastic.org"
+        self.mqttS_broker = "broker.emqx.io"
         self.mqtt_port = 1883
         self.mqtt_username = "meshdev"
         self.mqtt_password = "large4cats"
@@ -50,10 +55,21 @@ class MqttDispositivo:
     def set_topic(self):
         if self.debug:
             print("set_topic")
-        node_name = '!' + hex(self.node_number)[2:]
-        self.subscribe_topic = self.root_topic + self.channel + "/#"
-        self.TOPICS.append(self.subscribe_topic)
-        self.publish_topic = self.root_topic + self.channel + "/" + node_name
+        
+        # Reiniciar TOPICS con los topics base
+        self.TOPICS = self.BASE_TOPICS.copy()
+        
+        # Solo añadir topic de Meshtastic si estamos en ese broker
+        if self.mqtt_broker == self.meshtastic_broker:
+            node_name = '!' + hex(self.node_number)[2:]
+            self.subscribe_topic = self.root_topic + self.channel + "/#"
+            self.TOPICS.append(self.subscribe_topic)
+            self.publish_topic = self.root_topic + self.channel + "/" + node_name
+            if self.debug:
+                print(f"Topics de Meshtastic añadidos: {self.subscribe_topic}")
+        else:
+            if self.debug:
+                print("Broker externo detectado, solo topics de sensores")
 
     def xor_hash(self, data):
         result = 0
@@ -72,9 +88,7 @@ class MqttDispositivo:
     def create_client_and_callbacks(self, on_message_callback=None):
         """Crea el cliente MQTT y asigna callbacks (pero no hace connect)."""
         if self.client is None:
-            # don't force CallbackAPIVersion — use default for compatibility
-            self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id="", clean_session=True, userdata=None)
-            # assign our internal handlers (use signature compatible with most paho versions)
+            self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="", clean_session=True, userdata=None)
             self.client.on_connect = self._on_connect
             self.client.on_disconnect = self._on_disconnect
             if on_message_callback:
@@ -83,11 +97,9 @@ class MqttDispositivo:
     def connect_mqtt(self):
         """Conecta al broker MQTT"""
         if self.debug:
-            print("connect_mqtt")
+            print(f"connect_mqtt a broker: {self.mqtt_broker}")
 
-        # create client if not yet created (but callbacks may have been set externally)
-        if self.client is None:
-            self.create_client_and_callbacks()
+        self.create_client_and_callbacks()
 
         try:
             # Soporte para broker:port
@@ -138,38 +150,41 @@ class MqttDispositivo:
     def get_client(self):
         return self.client
 
-    # Use a connect callback signature compatible with common paho versions:
-    def _on_connect(self, client, userdata, flags, reason_code, properties):
-        """Callback interno para conexión (firma: client, userdata, flags, rc)"""
+    def _on_connect(self, client, userdata, properties, reason_code, flags):
+        """Callback interno para conexión"""
         if self.debug:
             print(f"_on_connect called with rc={reason_code}")
-        # set topics and subscribe
+        
         try:
+            # Configurar topics según el broker actual
             self.set_topic()
-            if self.client is not None and self.client.is_connected():
-                print("client is connected")
-
+            
             if reason_code == 0:
                 if self.debug:
                     print(f"Connected to server: {self.mqtt_broker}")
-                    print(f"Subscribe Topic is: {self.subscribe_topic}")
-                    print(f"Publish Topic is: {self.publish_topic}\n")
-                # subscribe after successful connect
+                    print(f"Topics a suscribir: {self.TOPICS}")
+                    if self.mqtt_broker == self.meshtastic_broker:
+                        print(f"Publish Topic is: {self.publish_topic}")
+                
+                # Suscribirse a todos los topics configurados
                 for topic in self.TOPICS:
-                    self.client.subscribe(topic)
-                    print(f"Suscrito al tema '{topic}'")
+                    result = self.client.subscribe(topic)
+                    if self.debug:
+                        print(f"Suscrito al tema '{topic}'")
+            else:
+                print(f"Conexión fallida con código: {reason_code}")
+                
         except Exception as e:
             print("_on_connect exception:", e)
 
-    def _on_disconnect(self, client, userdata, rc, properties):
-        """Callback interno para desconexión (firma: client, userdata, rc)"""
+    def _on_disconnect(self, client, userdata, flags, rc, properties):
+        """Callback interno para desconexión"""
         if self.debug:
             print("on_disconnect rc=", rc)
         if rc != 0:
             if self.auto_reconnect:
                 print("attempting to reconnect in " + str(self.auto_reconnect_delay) + " second(s)")
                 time.sleep(self.auto_reconnect_delay)
-                # try reconnect
                 try:
                     self.connect_mqtt()
                 except Exception as e:
