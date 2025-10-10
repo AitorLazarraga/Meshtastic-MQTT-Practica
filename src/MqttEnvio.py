@@ -22,7 +22,6 @@ class MqttEnvio:
             self.connector.connect_mqtt()
 
         if message_text:
-            print(f"Soy un debug del message text {message_text}")
             encoded_message = mesh_pb2.Data()
             encoded_message.portnum = portnums_pb2.TEXT_MESSAGE_APP
             encoded_message.payload = message_text.encode("utf-8")
@@ -115,16 +114,12 @@ class MqttEnvio:
             print(f"ID:{image_id}, Total Parts:{total_parts}, Tipo:{tipo_imagen}")
         message_text = f"Estado:INICIO_IMAGEN, ID:{image_id}, Total_parts:{total_parts}, Format:{tipo_imagen}"
         self.send_message(destination_id, message_text)
-        time.sleep(1)
+        time.sleep(5)
 
         for part in parts:
-
-            message_text = str(part)
-            encoded_message = mesh_pb2.Data()
-            encoded_message.portnum = portnums_pb2.TEXT_MESSAGE_APP
-            encoded_message.payload = message_text.encode("utf-8")
-            self._generate_mesh_packet(destination_id, encoded_message)
-            time.sleep(0.5)  # Pequeña pausa entre envíos para evitar saturación
+            message_text = ','.join(f"{k}:{v}" for k, v in part.items())
+            self.send_message(destination_id, message_text)
+            time.sleep(5)  # Pequeña pausa entre envíos para evitar saturación
 
         message_text = f"Estado:FIN_IMAGEN, ID:{image_id}, Total_parts:{total_parts}, Format:{tipo_imagen}"
         if self.debug:

@@ -4,6 +4,8 @@ from meshtastic import BROADCAST_NUM
 from src.MqttRecibo import MqttRecibo
 from src.ImageEncoder import ImageEncoder
 import time
+import tkinter as tk
+from tkinter import filedialog
 from pathlib import Path
 
 class Interfaz:
@@ -18,6 +20,8 @@ class Interfaz:
 
         self.IMAGENES_DIR = self.ROOT_DIR / "Datos" / "Imagenes"
 
+        self.Encoder = ImageEncoder()
+                        
 
         if not connector or not receiver or not sender:
             self.connector = MqttDispositivo()
@@ -78,17 +82,20 @@ class Interfaz:
                             print("No estamos ready")
                             self.connector.connect_mqtt()
                     case 3:
-                        self.Encoder = ImageEncoder()
-                        print("Enviando imagen de gato...")
-                        
-                        fotogato = 'Datos/Imagenes/GatoGordo.jpg' #self.IMAGENES_DIR / "GatoGordo.jpg"
-                        id_imagen = fotogato[:3] 
-                        
-                        cadena64, tipo_imagen = self.Encoder.imagen_a_cadena(fotogato)
-                        partes_imagen, cantidad_paquetes = self.Encoder.fragmentar_payload(cadena64, id_imagen)
+                        root = tk.Tk()
+                        root.withdraw()
 
-                        print(f"Debug 2 La imagen tiene {cantidad_paquetes} partes.")
-                        print(f"Debug 3 Se envia como : {type(partes_imagen)}")
+                        # Abrir el explorador de archivos
+                        foto = filedialog.askopenfilename(
+                            title="Selecciona una Imagen para Enviar",
+                            filetypes=[("Imágenes", "*.png *.jpg *.jpeg"), ("Todos", "*.*")]
+                        )
+                        nombre = Path(foto)
+                        FotoEnvio = foto
+                        id_imagen = nombre.stem
+                        
+                        cadena64, tipo_imagen = self.Encoder.imagen_a_cadena(FotoEnvio)
+                        partes_imagen, cantidad_paquetes = self.Encoder.fragmentar_payload(cadena64, id_imagen)
 
                         if self.connector.is_connected():
                             self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)

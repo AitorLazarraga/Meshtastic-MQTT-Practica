@@ -8,6 +8,7 @@ import re
 import base64
 import pandas as pd
 from pathlib import Path
+from src.ImageEncoder import ImageEncoder
 
 class MqttRecibo:
     """Clase responsable de recibir y procesar mensajes"""
@@ -21,25 +22,29 @@ class MqttRecibo:
         self.gpsDF = pd.DataFrame(columns=['lat', 'lon', 'alt'])
         self.n_mensaje = 0
         self.partes_imagen = []
+        self.id_actual = None
+        self.partes_esperadas = 0
         # Opciones de impresi�n
         self.print_service_envelope = False
         self.print_message_packet = False
         self.print_node_info = True
         self.print_node_position = True
         self.print_node_telemetry = True
+        self.Encoder = ImageEncoder()
 
         self.MODULO_DIR = Path(__file__).resolve().parent
 
         self.ROOT_DIR = self.MODULO_DIR.parent
 
-        self.csv_filePos = "Datos\posiciones.csv"
-        self.csv_fileM = "Datos\mensajes.csv"
-        self.csv_fileGas = "Datos\GasSensor_data.csv"
-        self.csv_fileSen = "Datos\WaterSensor.csv"
+        self.csv_filePos = "Datos/posiciones.csv"
+        self.csv_fileM = "Datos/mensajes.csv"
+        self.csv_fileGas = "Datos/GasSensor_data.csv"
+        self.csv_fileSen = "Datos/WaterSensor.csv"
 
 
     def ParseText(self,payload_str):
-        matches = re.findall(r'(\w+):\s*([-\w.]+)', payload_str)
+        #Se ha cambiado la expresion regular para aceptar caracteres en base64 para las payloads de imagen
+        matches = re.findall(r"(\w+):([^,]+)", payload_str) #matches = re.findall(r"(\w+):\s*([-\w.]+)", payload_str)
         data = {}
         for k, v in matches:
             try:
@@ -122,7 +127,6 @@ class MqttRecibo:
                 if mp.decoded.portnum == portnums_pb2.PortNum.POSITION_APP:
                     pb = mp.decoded.payload
                     pb = pb.decode('utf-8')
-                    print(f"Soy un debug del payload de posiciones {pb}")
                     pb_dict = self.ParseText(pb)
 
                     lat = pb_dict.get("latitude_i",0)
@@ -160,29 +164,45 @@ class MqttRecibo:
                         pb = mp.decoded.payload
                         pb = pb.decode('utf-8')
                         pb_dict = self.ParseText(pb)
-                        if self.flag_imagen and pb_dict.get("id",None) == self.partes_imagen[0].get("id",None):
-                            self.partes_imagen.append(pb_dict)
-                            return
-                        if pb_dict.get("Estado",None) == "INICIO_IMAGEN":
+
+                        if pb_dict.get("Estado",None) == "INICIO_IMAGEN" and not self.flag_imagen:
                             print("Inicio de recepcion de imagen")
                             self.flag_imagen = True
                             self.partes_imagen = []
+                            self.id_actual = pb_dict.get("ID",None)
+                            self.partes_esperadas = pb_dict.get("Total_parts",None)
                             self.partes_imagen.append(pb_dict)
                             return
+                        
+                        if self.flag_imagen and pb_dict.get("id",None) == self.id_actual:
+                            self.partes_imagen.append(pb_dict)
+                            print(f"Parte guardada, {pb_dict}")
+                            return
+                        
                         elif pb_dict.get("Estado",None) == "FIN_IMAGEN" and self.flag_imagen:
                             print("Fin de recepcion de imagen")
-                            self.partes_imagen.append(pb_dict)
-                            flag_imagen = False
-                            # Reconstruir la imagen
-                            self.partes_imagen.sort(key=lambda x: x['part'])
-                            cadena_completa = ''.join([parte['data'] for parte in self.partes_imagen if 'data' in parte])
-                            id_imagen = self.partes_imagen[0]['id']
+                            id_imagen = self.partes_imagen[0]['ID']
                             tipo_imagen = self.partes_imagen[0]['Format']
-                            ruta_salida = self.MODULO_DIR / f"imagen_recibida_{id_imagen}.{tipo_imagen}"
-                            print(f"Guardando imagen recibida como {ruta_salida}")
-                            self.Encoder.cadena_a_imagen(cadena_completa, ruta_salida)
-                            self.partes_imagen = []
-                            return
+                            del self.partes_imagen[0] #Eliminar la parte de inicio de imagen
+                            if len(self.partes_imagen) == self.partes_esperadas: #No hay que restar porque el indice empieza en 0 pero seenvia el mensaje cabecera
+                                print("Todas las partes recibidas correctamente")
+                                self.flag_imagen = False
+                                # Reconstruir la imagen
+                                self.partes_imagen.sort(key=lambda x: x['part'])
+                                cadena_completa = ''.join([parte['data'] for parte in self.partes_imagen if 'data' in parte])
+                                ruta_salida = f"Datos/Imagenes/imagen_recibida_{id_imagen}.{tipo_imagen}"
+                                print(f"Guardando imagen recibida como {ruta_salida}")
+                                self.Encoder.cadena_a_imagen(cadena_completa, ruta_salida)
+                                self.partes_imagen = []
+                                return
+                            
+                            else:
+                                print(f"Faltan partes de la imagen. Esperadas: {self.partes_esperadas}, Recibidas: {len(self.partes_imagen)}")
+                                print(f"Partes recibidas: {self.partes_imagen}")
+                                self.flag_imagen = False
+                                self.partes_imagen = []
+                                return
+                            
                         pb = "Hora" + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb
                         self.mensajes[self.n_mensaje] = pb
                     print(f"Mensaje {self.n_mensaje} guardado")
