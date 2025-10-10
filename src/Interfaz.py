@@ -1,17 +1,24 @@
-from MqttDispositivo import MqttDispositivo
-from MqttEnvio import MqttEnvio
+from src.MqttDispositivo import MqttDispositivo
+from src.MqttEnvio import MqttEnvio
 from meshtastic import BROADCAST_NUM
-from MqttRecibo import MqttRecibo
+from src.MqttRecibo import MqttRecibo
+from src.ImageEncoder import ImageEncoder
 import time
+from pathlib import Path
 
 class Interfaz:
-    def __init__(self, connector=None, receiver=None, sender=None):
+    def __init__(self, connector, receiver, sender):
         self.sel = 0
         self.mensaje = ""
         self.opciones = {1: "Enviar Mensaje",2: "Enviar Info Nodo", 3: "Enviar Position" ,4: "Ver Mensajes",5:"Cambiar Broker" ,6: "Salir"}
-        
-        # Usar instancias pasadas en lugar de crear nuevas
-        if connector is None:
+
+        self.MODULO_DIR = Path(__file__).resolve().parent
+
+        self.ROOT_DIR = self.MODULO_DIR.parent
+
+        self.IMAGENES_DIR = self.ROOT_DIR / "Datos" / "Imagenes"
+
+        if not connector or not receiver or not sender:
             self.connector = MqttDispositivo()
             self.connector.create_client_and_callbacks()
             self.connector.connect_mqtt()
@@ -22,8 +29,6 @@ class Interfaz:
             self.receiver = receiver
             self.sender = sender
 
-        print("Interfaz creada")
-        
     def mostrar_menu(self): 
         if self.connector.mqtt_broker == "mqtt.meshtastic.org" :
             print("Seleccione una opción:")
@@ -50,6 +55,7 @@ class Interfaz:
                 print("Quieres enviar el mensaje predeterminado o crear uno nuevo?")
                 print("1. Mensaje predeterminado")
                 print("2. Crear nuevo mensaje")
+                print("3. Enviar Imagen")
                 try:
                     opcion_mensaje = int(input("Seleccione una opción: "))
                 except ValueError:
@@ -70,6 +76,14 @@ class Interfaz:
                         else:
                             print("No estamos ready")
                             self.connector.connect_mqtt()
+                    case 3:
+                        print("Enviando imagen de gato...")
+                        cadenagato = ImageEncoder()
+                        fotogato = self.IMAGENES_DIR / "foto1.jpg"
+                        self.mensaje = (f"IMAGEN " + cadenagato.imagen_a_cadena(fotogato))
+                        if self.connector.is_connected():
+                            self.sender.send_message(BROADCAST_NUM, self.mensaje)
+                        cadenagato.cadena_a_imagen(cadenagato.cadena_base64, "GatoEnviado.jpg")
                     case _:
                         print("Opción no válida")
             case 2:

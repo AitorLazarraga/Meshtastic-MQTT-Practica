@@ -129,7 +129,7 @@ class MqttRecibo:
                     if self.n_mensaje % 10 == 0:
                         print("Guardando mensajes en csv")
 
-                        mensajes_df = pd.DataFrame.from_dict(self.mensajes, orient='index')
+                        mensajes_df = pd.DataFrame.from_dict(self.mensajes, orient='index', mode = 'a')
                         mensajes_df.to_csv('mensajes.csv', index=False)
                         self.mensajes.clear()
 
@@ -138,10 +138,12 @@ class MqttRecibo:
                         pb = mp.decoded.payload
                         pb = pb.decode('utf-8')
                         pb_dict = self.ParseText(pb)
+                        pb_dict["Hora"] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
                         self.mensajes[self.n_mensaje] = pb_dict
                     if mp.decoded.portnum == portnums_pb2.PortNum.TEXT_MESSAGE_APP:
                         pb = mp.decoded.payload
                         pb = pb.decode('utf-8')
+                        pb = "Hora" + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb
                         self.mensajes[self.n_mensaje] = pb
                     print(f"Mensaje {self.n_mensaje} guardado")
 
