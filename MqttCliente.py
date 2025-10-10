@@ -24,11 +24,7 @@ class MqttCliente:
         self.connector.connect_mqtt()
 
         # Pasar las instancias a Interfaz para que use las mismas
-        self.interface = Interfaz(
-            connector=self.connector,
-            receiver=self.receiver,
-            sender=self.sender
-        )
+        self.interface = Interfaz(connector=self.connector, receiver=self.receiver, sender=self.sender)
 
     def run(self):
         while True:

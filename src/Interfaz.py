@@ -18,6 +18,7 @@ class Interfaz:
 
         self.IMAGENES_DIR = self.ROOT_DIR / "Datos" / "Imagenes"
 
+
         if not connector or not receiver or not sender:
             self.connector = MqttDispositivo()
             self.connector.create_client_and_callbacks()
@@ -77,13 +78,20 @@ class Interfaz:
                             print("No estamos ready")
                             self.connector.connect_mqtt()
                     case 3:
+                        self.Encoder = ImageEncoder()
                         print("Enviando imagen de gato...")
-                        cadenagato = ImageEncoder()
-                        fotogato = self.IMAGENES_DIR / "foto1.jpg"
-                        self.mensaje = (f"IMAGEN " + cadenagato.imagen_a_cadena(fotogato))
+                        
+                        fotogato = 'Datos/Imagenes/GatoGordo.jpg' #self.IMAGENES_DIR / "GatoGordo.jpg"
+                        id_imagen = fotogato[:3] 
+                        
+                        cadena64, tipo_imagen = self.Encoder.imagen_a_cadena(fotogato)
+                        partes_imagen, cantidad_paquetes = self.Encoder.fragmentar_payload(cadena64, id_imagen)
+
+                        print(f"Debug 2 La imagen tiene {cantidad_paquetes} partes.")
+                        print(f"Debug 3 Se envia como : {type(partes_imagen)}")
+
                         if self.connector.is_connected():
-                            self.sender.send_message(BROADCAST_NUM, self.mensaje)
-                        cadenagato.cadena_a_imagen(cadenagato.cadena_base64, "GatoEnviado.jpg")
+                            self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
                     case _:
                         print("Opción no válida")
             case 2:

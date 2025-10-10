@@ -25,6 +25,10 @@ class ImageEncoder:
     def __init__(self):
         self.cadena_imagen = ""
         self.cadena_base64 = ""
+        self.cadena_cortada = []
+        self.cantidad_partes = 0
+        self.tipo_imagen = ""
+        self.max_bytes = 200  # Máximo tamaño en bytes por fragmento
 
     def imagen_a_cadena(self,ruta_imagen):
         """
@@ -32,12 +36,12 @@ class ImageEncoder:
         """
         try:
             with open(ruta_imagen, "rb") as imagen_file:
+                self.tipo_imagen = ruta_imagen.split('.')[-1]  # Obtener la extensión del archivo
                 # Lee los datos binarios de la imagen
                 imagen_bytes = imagen_file.read()
                 # Codifica los bytes a Base64
                 self.cadena_base64 = base64.b64encode(imagen_bytes).decode('utf-8')
-                print(self.cadena_base64)
-                return self.cadena_base64
+                return self.cadena_base64, self.tipo_imagen
         except FileNotFoundError:
             return "Error: El archivo de imagen no se encontró."
         except Exception as e:
@@ -56,3 +60,31 @@ class ImageEncoder:
             print(f"Imagen guardada en {ruta_salida}")
         except Exception as e:
             print(f"Ocurrió un error al guardar la imagen: {e}")
+
+
+    def fragmentar_payload(self,base64_data, id_imagen):
+        partes = []
+        index = 0
+
+        while base64_data:
+            # Buscamos cuántos caracteres caben en la cadena 'data'
+            #Para esto se itera a traves de un diccionario que ya tiene la id y la parte
+            #y se va aumentando el tamaño de data hasta que el tamaño en bytes del diccionario
+            #supere los max_bytes permitidos entonces se borra un caracter y se guarda esa parte
+            for i in range(1, len(base64_data) + 1):
+                dic = {'id': id_imagen, 'part': index, 'data': base64_data[:i]}
+                literal = str(dic)
+                size = len(literal.encode('utf-8'))
+
+                if size > self.max_bytes:
+                    i -= 1
+                    break
+
+            parte_dic = {'id': id_imagen, 'part': index, 'data': base64_data[:i]} # Crear el diccionario con la parte actual
+            partes.append(parte_dic) # Añadir la parte a la lista de partes
+            base64_data = base64_data[i:] # Actualizar la cadena base64 eliminando la parte ya procesada
+            index += 1
+
+        print(f"Debug: La imagen tiene {index} partes.")
+        return partes, index # Devolver la lista de partes
+

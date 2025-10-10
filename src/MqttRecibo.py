@@ -7,6 +7,7 @@ import json
 import re
 import base64
 import pandas as pd
+from pathlib import Path
 
 class MqttRecibo:
     """Clase responsable de recibir y procesar mensajes"""
@@ -16,24 +17,38 @@ class MqttRecibo:
         self.debug = connector.debug
         self.mensajes = {}
         self.posiciones = []
+        self.flag_imagen = False
         self.gpsDF = pd.DataFrame(columns=['lat', 'lon', 'alt'])
         self.n_mensaje = 0
+        self.partes_imagen = []
         # Opciones de impresi�n
         self.print_service_envelope = False
         self.print_message_packet = False
         self.print_node_info = True
         self.print_node_position = True
         self.print_node_telemetry = True
-        self.csv_file = 'posiciones.csv'
+
+        self.MODULO_DIR = Path(__file__).resolve().parent
+
+        self.ROOT_DIR = self.MODULO_DIR.parent
+
+        self.csv_filePos = "Datos\posiciones.csv"
+        self.csv_fileM = "Datos\mensajes.csv"
+        self.csv_fileGas = "Datos\GasSensor_data.csv"
+        self.csv_fileSen = "Datos\WaterSensor.csv"
+
 
     def ParseText(self,payload_str):
         matches = re.findall(r'(\w+):\s*([-\w.]+)', payload_str)
         data = {}
         for k, v in matches:
-            if v.lstrip('-').isdigit():
+            try:
                 data[k] = int(v)
-            else:
-                data[k] = v
+            except ValueError:
+                try:
+                    data[k] = float(v)
+                except ValueError:
+                    data[k] = v
         return data
 
     def on_message(self, client, userdata, msg):
@@ -49,7 +64,7 @@ class MqttRecibo:
                     payload = json.loads(msg.payload.decode("utf-8"))
                     print(json.dumps(payload, indent=4))  # Mostrar el mensaje formateado
                     df = pd.DataFrame([payload])
-                    df.to_csv('WaterSensor.csv', mode='a', header=not os.path.exists('sensor_data.csv'), index=False)
+                    df.to_csv(self.csv_fileSen, mode='a', header=not os.path.exists(self.csv_fileSen), index=False)
                 except json.JSONDecodeError as e:
                     print(f"Error decodificando JSON: {e}")
             
@@ -59,7 +74,7 @@ class MqttRecibo:
                     payload = json.loads(msg.payload.decode("utf-8"))
                     print(json.dumps(payload, indent=4))  # Mostrar el mensaje formateado
                     df = pd.DataFrame([payload])
-                    df.to_csv('GasSensor_data.csv', mode='a', header=not os.path.exists('sensor_data.csv'), index=False)
+                    df.to_csv(self.csv_fileGas, mode='a', header=not os.path.exists(self.csv_fileGas), index=False)
                 except json.JSONDecodeError as e:
                     print(f"Error decodificando JSON: {e}")
 
@@ -119,18 +134,18 @@ class MqttRecibo:
                     nueva_posicion = pd.DataFrame([[lat, lon, alt]], columns=['lat', 'lon', 'alt'])
                     print(f"Guardando nueva posicion en csv {lat,lon,alt}")
                     nueva_posicion.to_csv(
-                        self.csv_file, 
+                        self.csv_filePos, 
                         mode='a',  # Modo append
-                        header=not os.path.exists(self.csv_file),  # Header solo si es nuevo
+                        header=not os.path.exists(self.csv_filePos),  # Header solo si es nuevo
                         index=False
                     )
-                else:   
+                else:  
                     self.n_mensaje += 1
                     if self.n_mensaje % 10 == 0:
                         print("Guardando mensajes en csv")
 
-                        mensajes_df = pd.DataFrame.from_dict(self.mensajes, orient='index', mode = 'a')
-                        mensajes_df.to_csv('mensajes.csv', index=False)
+                        mensajes_df = pd.DataFrame.from_dict(self.mensajes, orient='index')
+                        mensajes_df.to_csv(self.csv_fileM, index=False, mode='a', header=not os.path.exists(self.csv_fileM))
                         self.mensajes.clear()
 
                         print("Se han guardado los mensajes y limpiado el diccionario")
@@ -140,9 +155,34 @@ class MqttRecibo:
                         pb_dict = self.ParseText(pb)
                         pb_dict["Hora"] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
                         self.mensajes[self.n_mensaje] = pb_dict
+
                     if mp.decoded.portnum == portnums_pb2.PortNum.TEXT_MESSAGE_APP:
                         pb = mp.decoded.payload
                         pb = pb.decode('utf-8')
+                        pb_dict = self.ParseText(pb)
+                        if self.flag_imagen and pb_dict.get("id",None) == self.partes_imagen[0].get("id",None):
+                            self.partes_imagen.append(pb_dict)
+                            return
+                        if pb_dict.get("Estado",None) == "INICIO_IMAGEN":
+                            print("Inicio de recepcion de imagen")
+                            self.flag_imagen = True
+                            self.partes_imagen = []
+                            self.partes_imagen.append(pb_dict)
+                            return
+                        elif pb_dict.get("Estado",None) == "FIN_IMAGEN" and self.flag_imagen:
+                            print("Fin de recepcion de imagen")
+                            self.partes_imagen.append(pb_dict)
+                            flag_imagen = False
+                            # Reconstruir la imagen
+                            self.partes_imagen.sort(key=lambda x: x['part'])
+                            cadena_completa = ''.join([parte['data'] for parte in self.partes_imagen if 'data' in parte])
+                            id_imagen = self.partes_imagen[0]['id']
+                            tipo_imagen = self.partes_imagen[0]['Format']
+                            ruta_salida = self.MODULO_DIR / f"imagen_recibida_{id_imagen}.{tipo_imagen}"
+                            print(f"Guardando imagen recibida como {ruta_salida}")
+                            self.Encoder.cadena_a_imagen(cadena_completa, ruta_salida)
+                            self.partes_imagen = []
+                            return
                         pb = "Hora" + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb
                         self.mensajes[self.n_mensaje] = pb
                     print(f"Mensaje {self.n_mensaje} guardado")

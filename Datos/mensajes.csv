@@ -8,3 +8,4 @@ Quién eres?
 "{'time': 1759831356, 'battery_level': 27, 'voltage': '3.498', 'channel_utilization': '3.50166678', 'air_util_tx': '1.96947217', 'uptime_seconds': 4512}"
 "{'time': 1759833559, 'battery_level': 26, 'voltage': '3.492', 'channel_utilization': '4.76', 'air_util_tx': '2.79444432', 'uptime_seconds': 6715}"
 Quien está con la práctica?
+SEEED_XIAO_S3,false,2025-10-10 19:15:29

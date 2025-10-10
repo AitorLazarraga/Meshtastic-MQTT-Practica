@@ -37,8 +37,8 @@ class MqttDispositivo:
         self.random_hex_chars = ''.join(random.choices('0123456789abcdef', k=4))
         self.node_name = '!abcd' + self.random_hex_chars
         self.node_number = int(self.node_name.replace("!", ""), 16)
-        self.client_short_name = "BOT"
-        self.client_long_name = "Bottastic"
+        self.client_short_name = "ALP"
+        self.client_long_name = "Aitor_PC" + self.random_hex_chars
         self.lat = "0"
         self.lon = "0"
         self.alt = "0"
