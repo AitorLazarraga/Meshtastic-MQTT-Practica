@@ -14,27 +14,23 @@ class Interfaz:
         self.mensaje = ""
         self.opciones = {1: "Enviar Mensaje",2: "Enviar Info Nodo", 3: "Enviar Position" ,4: "Ver Mensajes",5:"Cambiar Broker" ,6: "Salir"}
 
-        self.MODULO_DIR = Path(__file__).resolve().parent
-
-        self.ROOT_DIR = self.MODULO_DIR.parent
-
-        self.IMAGENES_DIR = self.ROOT_DIR / "Datos" / "Imagenes"
-
         self.Encoder = ImageEncoder()
                         
-
         if not connector or not receiver or not sender:
+            """En caso de haber iniciado la interfaz sin estar conectado o sin instanciar objetos se reconecta de forma forzada"""
             self.connector = MqttDispositivo()
             self.connector.create_client_and_callbacks()
             self.connector.connect_mqtt()
             self.receiver = MqttRecibo(self.connector)
             self.sender = MqttEnvio(self.connector)
+
         else:
             self.connector = connector
             self.receiver = receiver
             self.sender = sender
 
     def mostrar_menu(self): 
+        """Muestra el menu e impide realizar acciónes en modo mqtt"""
         if self.connector.mqtt_broker == "mqtt.meshtastic.org" :
             print("Seleccione una opción:")
             for key, value in self.opciones.items():
@@ -50,6 +46,7 @@ class Interfaz:
                 return
                 
     def seleccionar_opcion(self, opcion):
+        """ Recoge la opción del usuario y trabaja en respecto """
         if opcion in self.opciones:
             self.sel = opcion
             print(f"Opción seleccionada: {self.opciones[opcion]}")
@@ -82,6 +79,7 @@ class Interfaz:
                             print("No estamos ready")
                             self.connector.connect_mqtt()
                     case 3:
+                        """Se usa tkinter para seleccion de archivo de imagen"""
                         root = tk.Tk()
                         root.withdraw()
 
@@ -90,12 +88,13 @@ class Interfaz:
                             title="Selecciona una Imagen para Enviar",
                             filetypes=[("Imágenes", "*.png *.jpg *.jpeg"), ("Todos", "*.*")]
                         )
+                        
                         nombre = Path(foto)
                         FotoEnvio = foto
                         id_imagen = nombre.stem
                         
-                        cadena64, tipo_imagen = self.Encoder.imagen_a_cadena(FotoEnvio)
-                        partes_imagen, cantidad_paquetes = self.Encoder.fragmentar_payload(cadena64, id_imagen)
+                        cadena64, tipo_imagen = self.Encoder.imagen_a_cadena(FotoEnvio) #Se obtiene la cadena de la imagen y su formato
+                        partes_imagen, cantidad_paquetes = self.Encoder.fragmentar_payload(cadena64, id_imagen) #Se obtienen los paquetes a enviar
 
                         if self.connector.is_connected():
                             self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
@@ -111,6 +110,8 @@ class Interfaz:
                 print("Mostrando mensajes recibidos...")
                 self.receiver.mostrar_mensajes()
             case 5:
+                """Opcion de cambio de broker
+                Para mayor sencillez se usan 3 strings, dos constantes de los brokers y el que se usa para conexiones"""
                 if self.connector.mqtt_broker == self.connector.meshtastic_broker:
                     print("Cambiando a broker EMQX")
                     self.connector.mqtt_broker = self.connector.mqttS_broker
@@ -125,6 +126,7 @@ class Interfaz:
                     self.connector.mqtt_broker = self.connector.meshtastic_broker
                     self.connector.disconnect_mqtt()
                     time.sleep(2)
+                    #Limpiar topis antes de reconectar
                     self.connector.subscribe_topic = ""
                     self.connector.publish_topic = ""
                     self.connector.connect_mqtt()
@@ -137,6 +139,7 @@ class Interfaz:
                 print("Opción no válida")
    
     def run(self):
+        """Se muestra el menu y se espera a la entrada de usuario"""
         while True:
             self.mostrar_menu()
             if self.connector.mqtt_broker == self.connector.meshtastic_broker:

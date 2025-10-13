@@ -27,6 +27,7 @@ class MqttCliente:
         self.interface = Interfaz(connector=self.connector, receiver=self.receiver, sender=self.sender)
 
     def run(self):
+        """ Se conecta y se espera hasta estar preparado para iniciar la interfaz """
         while True:
             if self.connector.is_connected():
                 print("Conectado al broker MQTT")

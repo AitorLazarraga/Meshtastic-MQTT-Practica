@@ -108,22 +108,27 @@ class MqttEnvio:
         self._generate_mesh_packet(destination_id, encoded_message)
 
     def send_img(self, destination_id, parts, total_parts, image_id, tipo_imagen):
-        """Env�a una imagen fragmentada"""
+        """Envia una imagen fragmentada"""
         if self.debug:
             print("Enviando imagen con datos")
             print(f"ID:{image_id}, Total Parts:{total_parts}, Tipo:{tipo_imagen}")
+
+        #Mensaje Cabecera    
         message_text = f"Estado:INICIO_IMAGEN, ID:{image_id}, Total_parts:{total_parts}, Format:{tipo_imagen}"
         self.send_message(destination_id, message_text)
         time.sleep(5)
 
+        #Envio Partes
         for part in parts:
             message_text = ','.join(f"{k}:{v}" for k, v in part.items())
             self.send_message(destination_id, message_text)
             time.sleep(5)  # Pequeña pausa entre envíos para evitar saturación
 
+        #Mensaje Finalizador
         message_text = f"Estado:FIN_IMAGEN, ID:{image_id}, Total_parts:{total_parts}, Format:{tipo_imagen}"
         if self.debug:
             print("Enviando fin de imagen")
+            
         self.send_message(destination_id, message_text)
 
     def _generate_mesh_packet(self, destination_id, encoded_message):

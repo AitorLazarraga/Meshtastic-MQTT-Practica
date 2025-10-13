@@ -14,11 +14,14 @@ class MqttRecibo:
     """Clase responsable de recibir y procesar mensajes"""
     
     def __init__(self, connector):
+
         self.connector = connector
         self.debug = connector.debug
+
         self.mensajes = {}
         self.posiciones = []
         self.flag_imagen = False
+
         self.gpsDF = pd.DataFrame(columns=['lat', 'lon', 'alt'])
         self.n_mensaje = 0
         self.partes_imagen = []
@@ -32,10 +35,6 @@ class MqttRecibo:
         self.print_node_telemetry = True
         self.Encoder = ImageEncoder()
 
-        self.MODULO_DIR = Path(__file__).resolve().parent
-
-        self.ROOT_DIR = self.MODULO_DIR.parent
-
         self.csv_filePos = "Datos/posiciones.csv"
         self.csv_fileM = "Datos/mensajes.csv"
         self.csv_fileGas = "Datos/GasSensor_data.csv"
@@ -43,9 +42,11 @@ class MqttRecibo:
 
 
     def ParseText(self,payload_str):
+        """Funcion de parseo de string a diccionario python"""
         #Se ha cambiado la expresion regular para aceptar caracteres en base64 para las payloads de imagen
         matches = re.findall(r"(\w+):([^,]+)", payload_str) #matches = re.findall(r"(\w+):\s*([-\w.]+)", payload_str)
         data = {}
+        #Tras encontrar los matches de tipo  Clave:Valor se mira si los valores son tipo float o entero.
         for k, v in matches:
             try:
                 data[k] = int(v)
@@ -56,52 +57,49 @@ class MqttRecibo:
                     data[k] = v
         return data
 
-    def on_message(self, client, userdata, msg):
-        """Procesa mensajes recibidos"""
-        se = mqtt_pb2.ServiceEnvelope()
-        if msg.topic == 'sensor/data/sen55' or msg.topic == 'sensor/data/gas_sensor':
-            print(f"Mensaje obtenido en el topico: {msg.topic}")
-            print(msg.payload.decode("utf-8"))
+    def procesar_sensores(self, msg):
+        """Al llegar un mensaje del topico sensor emqx se leen, se decodifican y se guardan en el csv que toque"""
+        print(f"Mensaje obtenido en el topico: {msg.topic}")
+        print(msg.payload.decode("utf-8"))
             
-            if msg.topic == 'sensor/data/sen55':
-                try:
-                    # Decodificar y convertir el mensaje de JSON a diccionario
-                    payload = json.loads(msg.payload.decode("utf-8"))
-                    print(json.dumps(payload, indent=4))  # Mostrar el mensaje formateado
-                    df = pd.DataFrame([payload])
-                    df.to_csv(self.csv_fileSen, mode='a', header=not os.path.exists(self.csv_fileSen), index=False)
-                except json.JSONDecodeError as e:
-                    print(f"Error decodificando JSON: {e}")
-            
-            if msg.topic == 'sensor/data/gas_sensor':
-                try:
-                    # Decodificar y convertir el mensaje de JSON a diccionario
-                    payload = json.loads(msg.payload.decode("utf-8"))
-                    print(json.dumps(payload, indent=4))  # Mostrar el mensaje formateado
-                    df = pd.DataFrame([payload])
-                    df.to_csv(self.csv_fileGas, mode='a', header=not os.path.exists(self.csv_fileGas), index=False)
-                except json.JSONDecodeError as e:
-                    print(f"Error decodificando JSON: {e}")
-
-            
-        else:
+        if msg.topic == 'sensor/data/sen55':
             try:
-                se.ParseFromString(msg.payload)
-                if self.print_service_envelope:
-                    print("")
-                    print("Service Envelope:")
-                    print(se)
-                mp = se.packet
-                if self.print_message_packet:
-                    print("")
-                    print("Message Packet:")
-                    print(mp)
-            except Exception as e:
-                print(f"*** ServiceEnvelope: {str(e)}")
-                return
-
-            if mp.HasField("encrypted") and not mp.HasField("decoded"):
-                self._decode_encrypted(mp)
+                # Decodificar y convertir el mensaje de JSON a diccionario
+                payload = json.loads(msg.payload.decode("utf-8"))
+                print(json.dumps(payload, indent=4))  # Mostrar el mensaje formateado
+                df = pd.DataFrame([payload])
+                df.to_csv(self.csv_fileSen, mode='a', header=not os.path.exists(self.csv_fileSen), index=False)
+            except json.JSONDecodeError as e:
+                print(f"Error decodificando JSON: {e}")
+            
+        if msg.topic == 'sensor/data/gas_sensor':
+            try:
+                # Decodificar y convertir el mensaje de JSON a diccionario
+                payload = json.loads(msg.payload.decode("utf-8"))
+                print(json.dumps(payload, indent=4))  # Mostrar el mensaje formateado
+                df = pd.DataFrame([payload])
+                df.to_csv(self.csv_fileGas, mode='a', header=not os.path.exists(self.csv_fileGas), index=False)
+            except json.JSONDecodeError as e:
+                print(f"Error decodificando JSON: {e}")
+   
+    def procesar_mensaje(self, msg):
+        """Si llega un mensaje que no sea de sensores se decodifica el paquete mesh y luego se trabaja dependiendo su port"""
+        se = mqtt_pb2.ServiceEnvelope()
+        try:
+            se.ParseFromString(msg.payload)
+        except Exception as e:
+            print(f"*** Error parseando ServiceEnvelope: {str(e)}")
+            return
+        
+        if self.print_service_envelope:
+            print("\nService Envelope:\n", se)
+        
+        mp = se.packet
+        if self.print_message_packet:
+            print("\nMessage Packet:\n", mp)
+        
+        if mp.HasField("encrypted") and not mp.HasField("decoded"):
+            self._decode_encrypted(mp)
 
             # Intentar procesar el payload desencriptado
             portNumInt = mp.decoded.portnum if mp.HasField("decoded") else None
@@ -120,92 +118,141 @@ class MqttRecibo:
                 # Limpiar y actualizar el payload
                 pb_str = str(pb).replace('\n', ' ').replace('\r', ' ').strip()
                 mp.decoded.payload = pb_str.encode("utf-8")
-            
-            
-            print(mp)
-            if mp.HasField("decoded"):
-                if mp.decoded.portnum == portnums_pb2.PortNum.POSITION_APP:
-                    pb = mp.decoded.payload
-                    pb = pb.decode('utf-8')
-                    pb_dict = self.ParseText(pb)
 
-                    lat = pb_dict.get("latitude_i",0)
-                    lon = pb_dict.get("longitude_i",0) 
-                    alt = pb_dict.get("altitude_i",0)
+        if mp.HasField('decoded'):
+            portnum = mp.decoded.portnum
 
-                    self.posiciones.append([lat,lon,alt])
+            if portnum == portnums_pb2.PortNum.POSITION_APP:
+                self._procesar_posicion(mp)
 
-                    nueva_posicion = pd.DataFrame([[lat, lon, alt]], columns=['lat', 'lon', 'alt'])
-                    print(f"Guardando nueva posicion en csv {lat,lon,alt}")
-                    nueva_posicion.to_csv(
-                        self.csv_filePos, 
-                        mode='a',  # Modo append
-                        header=not os.path.exists(self.csv_filePos),  # Header solo si es nuevo
-                        index=False
-                    )
-                else:  
-                    self.n_mensaje += 1
-                    if self.n_mensaje % 10 == 0:
-                        print("Guardando mensajes en csv")
+            elif portnum in [portnums_pb2.PortNum.NODEINFO_APP, portnums_pb2.PortNum.TELEMETRY_APP]:
+                self._procesar_telemetria(mp)
 
-                        mensajes_df = pd.DataFrame.from_dict(self.mensajes, orient='index')
-                        mensajes_df.to_csv(self.csv_fileM, index=False, mode='a', header=not os.path.exists(self.csv_fileM))
-                        self.mensajes.clear()
+            elif portnum == portnums_pb2.PortNum.TEXT_MESSAGE_APP:
+                self._procesar_texto(mp)
 
-                        print("Se han guardado los mensajes y limpiado el diccionario")
-                    if mp.decoded.portnum == portnums_pb2.PortNum.NODEINFO_APP or mp.decoded.portnum == portnums_pb2.PortNum.TELEMETRY_APP:
-                        pb = mp.decoded.payload
-                        pb = pb.decode('utf-8')
-                        pb_dict = self.ParseText(pb)
-                        pb_dict["Hora"] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
-                        self.mensajes[self.n_mensaje] = pb_dict
+    def _procesar_posicion(self, mp):
+        """Procesa mensajes de posición GPS"""
+        pb = mp.decoded.payload.decode('utf-8')
+        pb_dict = self.ParseText(pb)
+        
+        lat = pb_dict.get("latitude_i", 0)
+        lon = pb_dict.get("longitude_i", 0)
+        alt = pb_dict.get("altitude_i", 0)
+        
+        self.posiciones.append([lat, lon, alt])
+        print(f"Guardando nueva posición en csv: {(lat, lon, alt)}")
+        
+        nueva_posicion = pd.DataFrame([[lat, lon, alt]], columns=['lat', 'lon', 'alt'])
+        nueva_posicion.to_csv(
+            self.csv_filePos,
+            mode='a',
+            header=not os.path.exists(self.csv_filePos),
+            index=False
+        )
 
-                    if mp.decoded.portnum == portnums_pb2.PortNum.TEXT_MESSAGE_APP:
-                        pb = mp.decoded.payload
-                        pb = pb.decode('utf-8')
-                        pb_dict = self.ParseText(pb)
+    def _procesar_telemetria(self, mp):
+        """Procesa mensajes de telemetría o nodeinfo"""
+        self.n_mensaje += 1
+        pb = mp.decoded.payload
+        pb = pb.decode('utf-8')
+        pb_dict = self.ParseText(pb)
+        pb_dict["Hora"] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        print(f"Mensaje de telemtria recibido. Payload: {pb_dict}")
 
-                        if pb_dict.get("Estado",None) == "INICIO_IMAGEN" and not self.flag_imagen:
-                            print("Inicio de recepcion de imagen")
-                            self.flag_imagen = True
-                            self.partes_imagen = []
-                            self.id_actual = pb_dict.get("ID",None)
-                            self.partes_esperadas = pb_dict.get("Total_parts",None)
-                            self.partes_imagen.append(pb_dict)
-                            return
-                        
-                        if self.flag_imagen and pb_dict.get("id",None) == self.id_actual:
-                            self.partes_imagen.append(pb_dict)
-                            print(f"Parte guardada, {pb_dict}")
-                            return
-                        
-                        elif pb_dict.get("Estado",None) == "FIN_IMAGEN" and self.flag_imagen:
-                            print("Fin de recepcion de imagen")
-                            id_imagen = self.partes_imagen[0]['ID']
-                            tipo_imagen = self.partes_imagen[0]['Format']
-                            del self.partes_imagen[0] #Eliminar la parte de inicio de imagen
-                            if len(self.partes_imagen) == self.partes_esperadas: #No hay que restar porque el indice empieza en 0 pero seenvia el mensaje cabecera
-                                print("Todas las partes recibidas correctamente")
-                                self.flag_imagen = False
-                                # Reconstruir la imagen
-                                self.partes_imagen.sort(key=lambda x: x['part'])
-                                cadena_completa = ''.join([parte['data'] for parte in self.partes_imagen if 'data' in parte])
-                                ruta_salida = f"Datos/Imagenes/imagen_recibida_{id_imagen}.{tipo_imagen}"
-                                print(f"Guardando imagen recibida como {ruta_salida}")
-                                self.Encoder.cadena_a_imagen(cadena_completa, ruta_salida)
-                                self.partes_imagen = []
-                                return
-                            
-                            else:
-                                print(f"Faltan partes de la imagen. Esperadas: {self.partes_esperadas}, Recibidas: {len(self.partes_imagen)}")
-                                print(f"Partes recibidas: {self.partes_imagen}")
-                                self.flag_imagen = False
-                                self.partes_imagen = []
-                                return
-                            
-                        pb = "Hora" + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb
-                        self.mensajes[self.n_mensaje] = pb
-                    print(f"Mensaje {self.n_mensaje} guardado")
+        self.mensajes[self.n_mensaje] = pb_dict
+        
+        if self.n_mensaje % 10 == 0:
+            print("Guardando mensajes en CSV")
+            df = pd.DataFrame.from_dict(self.mensajes, orient='index')
+            df.to_csv(
+                self.csv_fileM,
+                index=False,
+                mode='a',
+                header=not os.path.exists(self.csv_fileM)
+            )
+            self.mensajes.clear()
+            print("Mensajes guardados y diccionario limpiado")
+
+    def _procesar_texto(self, mp):
+        """Procesa mensajes de texto (incluye imágenes fragmentadas)"""
+        pb = mp.decoded.payload
+        pb = pb.decode('utf-8')
+        pb_dict = self.ParseText(pb)
+
+        # Inicio de imagen
+        if pb_dict.get("Estado", None) == "INICIO_IMAGEN" and not self.flag_imagen:
+            print("Inicio de recepción de imagen")
+            self.flag_imagen = True
+            self.partes_imagen = []
+            self.id_actual = pb_dict.get("ID")
+            self.partes_esperadas = pb_dict.get("Total_parts")
+            self.partes_imagen.append(pb_dict)
+            return
+        
+        # Partes de imagen
+        if self.flag_imagen and pb_dict.get("id") == self.id_actual:
+            self.partes_imagen.append(pb_dict)
+            print(f"Parte guardada: {pb_dict}")
+            return
+
+        # Fin de imagen
+        if pb_dict.get("Estado") == "FIN_IMAGEN" and self.flag_imagen:
+            self._reconstruir_imagen()
+            return
+
+        # Mensaje normal de texto
+        self.n_mensaje += 1
+        pb_con_hora = "Hora" + " " + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb
+        self.mensajes[self.n_mensaje] = pb_con_hora
+        print(f"Mensaje: {pb_con_hora}")
+        print(f"Mensaje {self.n_mensaje} guardado")
+        
+        #Al tener 10 o más mensajes se guardan y se borra el diccionario
+        if self.n_mensaje % 10 == 0:
+            print("Guardando mensajes en CSV")
+            df = pd.DataFrame.from_dict(self.mensajes, orient='index')
+            df.to_csv(
+                self.csv_fileM,
+                index=False,
+                mode='a',
+                header=not os.path.exists(self.csv_fileM)
+            )
+            self.mensajes.clear()
+            print("Mensajes guardados y diccionario limpiado")
+
+    def _reconstruir_imagen(self):
+        """Reconstruye una imagen recibida por partes"""
+        
+        print("Fin de recepción de imagen")
+        id_imagen = self.partes_imagen[0]['ID']
+        tipo_imagen = self.partes_imagen[0]['Format']
+        del self.partes_imagen[0]
+        
+        if len(self.partes_imagen) == self.partes_esperadas:
+            print("Todas las partes recibidas correctamente")
+            self.flag_imagen = False
+            self.partes_imagen.sort(key=lambda x: x['part'])
+            cadena_completa = ''.join([p['data'] for p in self.partes_imagen if 'data' in p])
+            ruta_salida = f"Datos/Imagenes/imagen_recibida_{id_imagen}.{tipo_imagen}"
+            print(f"Guardando imagen recibida como {ruta_salida}")
+            self.Encoder.cadena_a_imagen(cadena_completa, ruta_salida)
+
+        else:
+            print(f"Faltan partes de la imagen. Esperadas: {self.partes_esperadas}, Recibidas: {len(self.partes_imagen)}")
+            print(f"Partes recibidas: {self.partes_imagen}")
+        
+        self.flag_imagen = False
+        self.partes_imagen = []
+
+
+    def on_message(self, client, userdata, msg):
+        """Procesa mensajes recibidos"""
+        if msg.topic in ['sensor/data/sen55', 'sensor/data/gas_sensor']:
+            self.procesar_sensores(msg)
+        else:
+            self.procesar_mensaje(msg)
 
     def _decode_encrypted(self, mp):
         """Desencripta un mensaje"""
