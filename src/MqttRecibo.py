@@ -44,10 +44,12 @@ class MqttRecibo:
     def ParseText(self,payload_str):
         """Funcion de parseo de string a diccionario python"""
         #Se ha cambiado la expresion regular para aceptar caracteres en base64 para las payloads de imagen
-        matches = re.findall(r"(\w+):([^,]+)", payload_str) #matches = re.findall(r"(\w+):\s*([-\w.]+)", payload_str)
+        print(payload_str)
+        matches = re.findall(r"(\w+):\s*([^,\s]+(?:\s(?!\w+:)[^,\s]+)*)", payload_str)
+    
         data = {}
-        #Tras encontrar los matches de tipo  Clave:Valor se mira si los valores son tipo float o entero.
         for k, v in matches:
+            v = v.strip()
             try:
                 data[k] = int(v)
             except ValueError:
@@ -136,10 +138,17 @@ class MqttRecibo:
         pb = mp.decoded.payload.decode('utf-8')
         pb_dict = self.ParseText(pb)
         
+        print(f"Diccionario posiciones === {pb_dict}")
+
         lat = pb_dict.get("latitude_i", 0)
         lon = pb_dict.get("longitude_i", 0)
-        alt = pb_dict.get("altitude_i", 0)
+        alt = pb_dict.get("altitude_hae", 0) 
         
+        print(f"Latitude === {lat}")
+        print(f"Longitude == {lon}")
+        print(f"Altitude === {alt}")
+
+
         self.posiciones.append([lat, lon, alt])
         print(f"Guardando nueva posición en csv: {(lat, lon, alt)}")
         
@@ -181,6 +190,8 @@ class MqttRecibo:
         pb = pb.decode('utf-8')
         pb_dict = self.ParseText(pb)
 
+        print(pb_dict)
+        print(pb_dict.get("Eestado"))
         # Inicio de imagen
         if pb_dict.get("Estado", None) == "INICIO_IMAGEN" and not self.flag_imagen:
             print("Inicio de recepción de imagen")
