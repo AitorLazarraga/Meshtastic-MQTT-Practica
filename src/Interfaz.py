@@ -7,6 +7,7 @@ import time
 import tkinter as tk
 from tkinter import filedialog
 from pathlib import Path
+from src.Contactos import Contactos
 
 class Interfaz:
     def __init__(self, connector, receiver, sender):
@@ -15,7 +16,8 @@ class Interfaz:
         self.opciones = {1: "Enviar Mensaje",2: "Enviar Info Nodo", 3: "Enviar Position" ,4: "Ver Mensajes",5:"Cambiar Broker" ,6: "Salir"}
 
         self.Encoder = ImageEncoder()
-                        
+        self.contacto = Contactos()      
+
         if not connector or not receiver or not sender:
             """En caso de haber iniciado la interfaz sin estar conectado o sin instanciar objetos se reconecta de forma forzada"""
             self.connector = MqttDispositivo()
@@ -58,6 +60,7 @@ class Interfaz:
                 print("1. Mensaje predeterminado")
                 print("2. Crear nuevo mensaje")
                 print("3. Enviar Imagen")
+                print("4. Enviar mensaje directo")
                 try:
                     opcion_mensaje = int(input("Seleccione una opción: "))
                 except ValueError:
@@ -96,8 +99,44 @@ class Interfaz:
                         cadena64, tipo_imagen = self.Encoder.imagen_a_cadena(FotoEnvio) #Se obtiene la cadena de la imagen y su formato
                         partes_imagen, cantidad_paquetes = self.Encoder.fragmentar_payload(cadena64, id_imagen) #Se obtienen los paquetes a enviar
 
-                        if self.connector.is_connected():
-                            self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
+                        print("1.Envio General \n 2.Envio Privado")
+                        opcion = int(input())
+                        match opcion:
+                            case 1:
+                                if self.connector.is_connected():
+                                    self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
+                            case 2:
+                                self.contacto.mostrar_contactos()
+                                nombre = input("A quien quieres enviarle la imagen\n")
+                                id_envio = self.contacto.elegir_contacto(nombre)
+                                try:
+                                    id_envio = int(id_envio.replace("!", ""), 16)
+                                except ValueError:
+                                    print("Fallo de id")
+                                if id_envio == None:
+                                    print("Contacto no encontrado")
+                                    return
+                                if self.connector.is_connected():
+                                    self.sender.send_img(id_envio, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
+                            case _:
+                                return
+                    case 4:
+                        """Se manda un mensaje directo a un contacto de la agenda"""
+                        self.contacto.mostrar_contactos()
+                        print("Elige a que contacto enviar un mensaje")
+                        nombre = input("Nombre del contacto a enviar \n")
+                        self.mensaje = input("Escribe mensaje a enviar")
+                        id_envio = self.contacto.elegir_contacto(nombre)
+                        try:
+                            id_envio = int(id_envio.replace("!", ""), 16)
+                        except ValueError:
+                            print("Fallo de id")
+                        if id_envio == None:
+                            print("Contacto no encontrado")
+                            return
+                        print(f"Enviando mensaje {self.mensaje} a id {id_envio}")
+                        self.sender.send_message(id_envio, self.mensaje)
+                    
                     case _:
                         print("Opción no válida")
             case 2:

@@ -9,6 +9,7 @@ import base64
 import pandas as pd
 from pathlib import Path
 from src.ImageEncoder import ImageEncoder
+from src.Contactos import Contactos
 
 class MqttRecibo:
     """Clase responsable de recibir y procesar mensajes"""
@@ -17,6 +18,7 @@ class MqttRecibo:
 
         self.connector = connector
         self.debug = connector.debug
+        self.contactos = Contactos()
 
         self.mensajes = {}
         self.posiciones = []
@@ -44,8 +46,7 @@ class MqttRecibo:
     def ParseText(self,payload_str):
         """Funcion de parseo de string a diccionario python"""
         #Se ha cambiado la expresion regular para aceptar caracteres en base64 para las payloads de imagen
-        print(payload_str)
-        matches = re.findall(r"(\w+):\s*([^,\s]+(?:\s(?!\w+:)[^,\s]+)*)", payload_str)
+        matches = re.findall(r"(\w+):\s*([^,\s]+(?:\s(?!\w+:)[^,\s]+)*)", payload_str) #re.findall(r"(\w+):\s*([^,\s])")
     
         data = {}
         for k, v in matches:
@@ -102,7 +103,8 @@ class MqttRecibo:
         
         if mp.HasField("encrypted") and not mp.HasField("decoded"):
             self._decode_encrypted(mp)
-
+            print(f"Mensaje mp {mp}")
+            
             # Intentar procesar el payload desencriptado
             portNumInt = mp.decoded.portnum if mp.HasField("decoded") else None
             handler = protocols.get(portNumInt) if portNumInt else None
@@ -123,26 +125,30 @@ class MqttRecibo:
 
         if mp.HasField('decoded'):
             portnum = mp.decoded.portnum
-
+            
             if portnum == portnums_pb2.PortNum.POSITION_APP:
+                #self.contactos.anadir_contacto(getattr(mp,"from"))
                 self._procesar_posicion(mp)
 
             elif portnum in [portnums_pb2.PortNum.NODEINFO_APP, portnums_pb2.PortNum.TELEMETRY_APP]:
                 self._procesar_telemetria(mp)
 
             elif portnum == portnums_pb2.PortNum.TEXT_MESSAGE_APP:
+                #.contactos.anadir_contacto(getattr(mp,"from"))
                 self._procesar_texto(mp)
 
     def _procesar_posicion(self, mp):
         """Procesa mensajes de posición GPS"""
         pb = mp.decoded.payload.decode('utf-8')
         pb_dict = self.ParseText(pb)
-        
-        print(f"Diccionario posiciones === {pb_dict}")
+        print(f"POSICIONESPB {pb_dict}")
 
         lat = pb_dict.get("latitude_i", 0)
         lon = pb_dict.get("longitude_i", 0)
-        alt = pb_dict.get("altitude_hae", 0) 
+        if pb_dict.get("altitude", "NAN") != "NAN":
+            alt = pb_dict.get("altitude",0)
+        else:
+            alt = pb_dict.get("altitude_hae", 0) 
         
         print(f"Latitude === {lat}")
         print(f"Longitude == {lon}")
@@ -166,6 +172,7 @@ class MqttRecibo:
         pb = mp.decoded.payload
         pb = pb.decode('utf-8')
         pb_dict = self.ParseText(pb)
+        self.contactos.anadir_contacto(pb_dict.get('id',"NAN"), pb_dict.get('long_name', None))
         pb_dict["Hora"] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
         
         print(f"Mensaje de telemtria recibido. Payload: {pb_dict}")
@@ -190,8 +197,6 @@ class MqttRecibo:
         pb = pb.decode('utf-8')
         pb_dict = self.ParseText(pb)
 
-        print(pb_dict)
-        print(pb_dict.get("Eestado"))
         # Inicio de imagen
         if pb_dict.get("Estado", None) == "INICIO_IMAGEN" and not self.flag_imagen:
             print("Inicio de recepción de imagen")

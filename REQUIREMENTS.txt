@@ -2,3 +2,4 @@ meshtastic
 paho-mqtt
 cryptography
 pandas
+pillow

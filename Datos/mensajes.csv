@@ -22,3 +22,93 @@ SEEED_XIAO_S3,false,2025-10-10 19:15:29
 " ""!ae609ce8"" long_name: ""XIAO-Client"" short_name: ""XI01"" macaddr: ""\230=\256`\234\350"" hw_model: SEEED_XIAO_S3 public_key: ""\324\342\t\360\324b\200y \311&\355\337Z\231\036\000\254\034\332\332@E\303\032\273)<\tD\316E"" is_unmessagable: false",2025-10-10 23:23:06
 " ""!ae609ce8"" long_name: ""XIAO-Client"" short_name: ""XI01"" macaddr: ""\230=\256`\234\350"" hw_model: SEEED_XIAO_S3 public_key: ""\324\342\t\360\324b\200y \311&\355\337Z\231\036\000\254\034\332\332@E\303\032\273)<\tD\316E"" is_unmessagable: false",2025-10-10 23:41:19
 " ""!ae609ce8"" long_name: ""XIAO-Client"" short_name: ""XI01"" macaddr: ""\230=\256`\234\350"" hw_model: SEEED_XIAO_S3 public_key: ""\324\342\t\360\324b\200y \311&\355\337Z\231\036\000\254\034\332\332@E\303\032\273)<\tD\316E"" is_unmessagable: false",2025-10-10 23:47:04
+Hora 2025-10-15 10:49:15 Soy un PC de Aitor
+"{'id': '""!65dcea48""', 'long_name': '""SeeedRepeater""', 'short_name': '""Ja4""', 'macaddr': '""\\331-e\\334\\352H""', 'hw_model': 'SEEED_SOLAR_NODE', 'public_key': '""\\203<\\352\\204\\034\\277\\221\\277\\335z\\315\\224\\360H\\214k\\005\\317[\\003\\260z\\017\\366X@\\nf\\350\\347\\266/""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 10:49:22'}"
+Hora 2025-10-15 10:51:28 Otro PC!
+"{'id': '""!ae609ce8""', 'long_name': '""XIAO-Client""', 'short_name': '""XI01""', 'macaddr': '""\\230=\\256`\\234\\350""', 'hw_model': 'SEEED_XIAO_S3', 'public_key': '""\\324\\342\\t\\360\\324b\\200y \\311&\\355\\337Z\\231\\036\\000\\254\\034\\332\\332@E\\303\\032\\273)<\\tD\\316E""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 10:54:57'}"
+"{'id': '""!abcd4011""', 'long_name': '""Manuel""', 'short_name': '""Man""', 'Hora': '2025-10-15 10:55:04'}"
+Hora 2025-10-15 10:55:13 funciona?
+"{'id': '""!65dcea48""', 'long_name': '""SeeedRepeater""', 'short_name': '""Ja4""', 'macaddr': '""\\331-e\\334\\352H""', 'hw_model': 'SEEED_SOLAR_NODE', 'public_key': '""\\203<\\352\\204\\034\\277\\221\\277\\335z\\315\\224\\360H\\214k\\005\\317[\\003\\260z\\017\\366X@\\nf\\350\\347\\266/""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 10:55:20'}"
+Hora 2025-10-15 10:55:35 Quien eres?
+Hora 2025-10-15 10:56:21 manu que se me ha fastidiado una cosa y no muestra los mensajes los tengo que mirar en el historial
+Hora 2025-10-15 10:56:29 6
+Hora 2025-10-15 10:56:43 Mmmm ok
+"{'id': '""!abcda8a1""', 'long_name': '""Alejandro""', 'short_name': '""AGG""', 'hw_model': 'PRIVATE_HW', 'Hora': '2025-10-15 10:56:50'}"
+Hora 2025-10-15 10:56:54 Hola
+Hora 2025-10-15 10:56:58 1
+Hora 2025-10-15 10:57:10 Manu no te va el programa?
+Hora 2025-10-15 10:57:36 A8a1 quién eres?
+Hora 2025-10-15 10:57:49 Alejandro
+Hora 2025-10-15 10:57:49 Alejandro o Aitor?
+Hora 2025-10-15 10:58:00 Otro…
+Hora 2025-10-15 11:01:06 Te llega Manu?
+Hora 2025-10-15 11:26:18 Soy un PC de Aitor
+Hora 2025-10-15 11:28:06 Soy un PC de Aitor
+Hora 2025-10-15 11:30:26 prueba dos de guardado en csv
+Hora 2025-10-15 11:31:48 Soy otro PC de Aitor
+Hora 2025-10-15 11:32:10 aaaaa
+"{'id': '""!ae609ce8""', 'long_name': '""XIAO-Client""', 'short_name': '""XI01""', 'macaddr': '""\\230=\\256`\\234\\350""', 'hw_model': 'SEEED_XIAO_S3', 'public_key': '""\\324\\342\\t\\360\\324b\\200y \\311&\\355\\337Z\\231\\036\\000\\254\\034\\332\\332@E\\303\\032\\273)<\\tD\\316E""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 11:32:10'}"
+"{'id': '""!65dcea48""', 'long_name': '""SeeedRepeater""', 'short_name': '""Ja4""', 'macaddr': '""\\331-e\\334\\352H""', 'hw_model': 'SEEED_SOLAR_NODE', 'public_key': '""\\203<\\352\\204\\034\\277\\221\\277\\335z\\315\\224\\360H\\214k\\005\\317[\\003\\260z\\017\\366X@\\nf\\350\\347\\266/""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 11:32:15'}"
+Hora 2025-10-15 11:36:36 prueba 23321 de guardar en csv
+Hora 2025-10-15 11:36:50 No soy Manu
+Hora 2025-10-15 11:36:57 a
+"Hora 2025-10-15 11:49:43 id:Captura,part:18,data:/5D/eP9//43/mP+E/1z/N/82/0n/Vf9P/z7/P/9N/1P/U/9Z/3L/m/+h/5r/pv8LALMA+wCUAN7/uf+MALABJgJ9AWAA3P8vAMAA7gDTALYAigAUAGj/Dv9g/xoAgQAhAG3/H/9m/83/7P/k//7/RQCEAH"
+Hora 2025-10-15 11:49:43 Holaaaaaa
+"Hora 2025-10-15 11:49:43 id:Captura,part:19,data:4ARQAuAHAA0ADxANMAtgC9ALsAngBgACsANgBlAHkALgDO/5r/l/+r/7z/zf/M/8H/sf+R/4H/pP/q/x8AKAAkABUAAQADACMAVABtAHAAVwAtAA4AEQAMAAAA6P/p/+D/xf+f/3b/Zf9o/4X/g/9o/0H/"
+"Hora 2025-10-15 11:49:43 id:Captura,part:20,data:PP87/zz/Lv8s/y3/K/8v/xf/D/8Y/0T/Z/9d/0z/Rv9T/6r/NgDbAOYAUQCq/67/wQAEAnoCmQFXANT/QwD2AEIBLQHxAIkA8P9S/yX/rf9xAK8AFwBS/xb/bP/Q//v/AQAZAE4AbwBaADUAUQCtAPkA9g"
+"Hora 2025-10-15 11:49:43 id:Captura,part:21,data:DQAMEA0wDlAMoAfwBHAEwAfgB8ADYA5/+l/5D/mf+s/7f/t/+7/6f/gv9//6r/4f8JAB4AHAACAPf/EAA0AE8AXgBUADQAGQAcABcAAwD5//z/AQDW/7P/hf94/4L/jv+D/0b/IP/8/vf+Av8P/xb//P7j"
+"{'id': '""!abcd22a0""', 'long_name': '""Aitor_PC01ae""', 'short_name': '""ALP""', 'hw_model': 'PRIVATE_HW', 'Hora': '2025-10-15 11:49:43'}"
+"Hora 2025-10-15 11:49:47 id:Captura,part:22,data:/sj+r/69/u3+HP8w/x7/Bf/2/g3/UP/C/1QA/QABAVoApv/Z/zcBkgLqAuIBjQAOAJoARwFyAU4BIgHDAP7/Nv8O/6n/aACRAOT/Iv8J/4f/6P/r/9//GQBqAJQAhgBeAHEAuAABAf0A4wD7ACABDQGwAF"
+"Hora 2025-10-15 11:49:52 id:Captura,part:23,data:kASgCBALwAmwAvAML/jv+N/43/mv+2/8n/tf94/1b/dv++//v/EwAZAB8AMgBDAEIAPQBeAIIAgwBUADMALQApACIA/v/d/7z/vv+9/5v/a/9b/07/Mf///tL+uP7E/tn+0P6j/lz+Vf5R/oL+q/7K/sz+"
+"Hora 2025-10-15 11:49:57 id:Captura,part:24,data:q/6v/rf+8v4h/3v/+v+zAB4BtgDt/7X/1QCJAnEDwwIxATMAegBFAbkBtwGcAT4BYwBL/8b+Sf9MAOIAYABn/+f+Nv+h/9L/9v9RALAAwgCPAE0AawDcAFkBbQE5AR0BLAEnAdwAjgByAJQAvACgAEMAzf"
+"Hora 2025-10-15 11:50:02 id:Captura,part:25,data:+G/37/if+n/8v/7f/N/3z/VP99/8j//P8VACgAQgBJADIAAwD9/0QAoACpAGAAKgAmACYACgDh/+T/7f/o/7L/S/8I//L+Gf8A/7/+nf6P/nT+Uv4v/jj+Lv46/k7+J/4r/j/+c/50/mn+jv6//uH+/f4h"
+"Hora 2025-10-15 11:50:07 id:Captura,part:26,data:/5n/hABrAUYBQACd/5oAqgL2A4gDtwFdAIMAigEcAvcBvQGFAcAAdP+r/h3/bQBWAegAkP+5/h3/+/9fAFAAZACjAMEAnQBqAIQA/gB3AW4B+gDGABQBagE+AbIARAA5AHwAmQBiAPP/n/98/2j/W/+I/9"
+"Hora 2025-10-15 11:50:12 id:Captura,part:27,data:7//v+8/1P/Pv+K/wQAXwBlADYAAQD3/wsANQByAKgAmwBQAA4ABQARACMAGQACAMP/g/9a/zr/H/8V/xf/zf6I/lf+UP48/iD+E/4J/v39//0D/ur96f0T/kj+Yf5p/m/+pf67/vn+Lv+5/7gAeQFZAV8A"
+"Hora 2025-10-15 11:50:18 id:Captura,part:28,data:zP/ZAOYCKAS3A/sBxgDaAKoBJgIcAvMBugHgAHf/vf5N/5YARAG8AJ//D/9c//T/EwAJAFcA0QD8ALEAawCNABABeAGHAUABOAF5AYMBBgFiADYAgQDjANUAWgC2/1v/V/90/6j/AgBDAAkAcf8f/2b/Dg"
+"Hora 2025-10-15 11:50:22 id:Captura,part:29,data:CRAIsANgD5/yEATwBgAHkAtwD2AMkAXwAWACQAdwB3ABMAhf89/0f/Tf8N/7L+gf5h/ln+I/4L/vL90v2t/af9o/3a/fP92/2V/VH9qv33/Xb+pP6u/mT+Kv48/s7+4f8yASkCbwEHAFP/vQAwA+gEbwRp"
+"Hora 2025-10-15 11:50:27 id:Captura,part:30,data:AsAApgCNATICfQKpAmQC9gBZ/6L+nf8kAewBJgG4/x3/hP8UACoAXAC7AAQByQCGAHoA5QB5Aa8BVwH+AEIBpgGaAQ4BtAB+AIsAlQB7AEEALAAkALv/SP9T/+n/RwAgAK7/c/+d/xcAOwASAAYARACIAF"
+"Hora 2025-10-15 11:50:32 id:Captura,part:31,data:QAHQAxAH4ArACFABcA7f8eADUABABu/0T/Rf8r//T+Yf5Y/mz+YP4a/qT9cf2e/eL94/2X/Vn9Uv1i/W/9sP0a/in+Lv7y/dP9HP6X/i3/6f7i/qH/2gDCAT4BIgC5/08BzwMSBf0D/wEAAU4BCAKdAtAC"
+"Hora 2025-10-15 11:50:37 id:Captura,part:32,data:+AKdAjIBef+y/tL/ggEZAh4Bwv8c/1b/wf8OAFAArAADAdcAawA8AK8ALgF0AVIBRgFsAZIBfwHNAEUALgCjAO4A1AB9AAEAmv9r/4T/0P8mAEcAAABz/03/jf/2/xkAKAA9AF0AXQBYAEwAWACUAJsAhA"
+"Hora 2025-10-15 11:50:42 id:Captura,part:33,data:AsACgALwD4/67/Tv8r/xL/1/6a/kP+J/4y/iL+4/1p/WD9d/18/XH9Nv09/R39O/1f/Vb9jP2w/eH95P3V/S/+U/5i/ov+k/4U/93/NgGvAdMA6v8KACQCcAROBQcE5AESAdUB0wJoA54DhwOBArcAa/97"
+"Hora 2025-10-15 11:50:47 id:Captura,part:34,data:/wgBcQJdAsAAH/++/j//x/9HAMEA7gCCAOf/xf8zACoBzwHAAUoBNgGKAaQBSQHdAMsA8gAZAfUArgBeAC4A5/+Q/5v/JgCqAHcAqP8D/xP/k/8GACwAMQBHADoA6v+J/53/WQDwAOEASADD/7H/0//C/3"
+"Hora 2025-10-15 11:50:52 id:Captura,part:35,data:7/IP8S//7+v/5f/hf+JP4O/vb9uv2w/Z/9av0g/dz84fwE/VP9OP0l/Qn9Ov1A/T/9sP0B/lX+QP4P/sz9x/1q/oz/sgDfAd4B1wDe/xMBJwRRBjkG+gMcAsUB4wLlAxAE4wOMAygCEwAa/xcA2QFTAj0B"
+"Hora 2025-10-15 12:12:55 Estado:INICIO_AUDIO,ID:Captura, Total_parts:551, Format:wav"
+"Hora 2025-10-15 12:13:00 id:Captura,part:1,data:vAE8AaAB0AHgAhACSAKcApwB0AFkAPAAgAPD/+f8IAM7/z//0/yQAPgA7ADsABQAYAF8AYAAtAPj/2//b/+D/8v/f/5v/lf+f/9T/BQAEABkABwACAPX/zP/W/7f/nv98/zX/Cv/7/vb+VP9x/0v/Qv9A/4"
+"Hora 2025-10-15 12:13:05 id:Captura,part:2,data:n/zf/r////6/+w/6v/pf+C/1z/UP9R/zX/df+l/7D/9f/+/yIAYQBaAG0AOADy/+7/zf+v/8r/wv+g/1L/Bf84/3v/+f8xADEAPQBOAI4A0QDdAOQArAB3AHoAOQA5ADEAAQD1/z4AbwB9AGQAPQBjAF4AX"
+"Hora 2025-10-15 12:13:10 id:Captura,part:3,data:QBVACoA/P/0/wgABAD+/wcAEQAgADQAQQBuAI4AigBIABUAMwAgAB4AHAAWABgAFAAVABMAEQAQAA8ADwAPAA4ADgAOAA4ADQANAAwADAALAAsACgAJAAkACAAHAAYABQAFAAYABQAEAAQAAwAEAAMAAwAC"
+"Hora 2025-10-15 12:13:15 id:Captura,part:4,data:AAIAAwACAAIAAQABAAEAAQABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAA"
+"Hora 2025-10-15 12:13:20 id:Captura,part:5,data:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+"Hora 2025-10-15 12:13:25 id:Captura,part:6,data:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+"Hora 2025-10-15 12:13:30 id:Captura,part:7,data:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+"Hora 2025-10-15 12:13:35 id:Captura,part:8,data:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+"Hora 2025-10-15 12:13:40 id:Captura,part:9,data:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+"Hora 2025-10-15 12:14:45 id:Captura,part:22,data:AAAP//AAAAAAAAAAAAAP///////////f/+//7//v/+//7///8AAP//AAAAAP////8AAP///////////v////7///8AAAAAAAABAAAAAAAAAAAAAAABAAEAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAEAAQAAA"
+"Hora 2025-10-15 12:14:50 id:Captura,part:23,data:AAAAAAAAAAAAAABAAEAAQAAAAEAAQABAAAAAQACAAEAAQACAAAAAQAAAAEAAQABAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAAAA//8AAAAAAAD//////////wAAAAAAAP//AAAAAAAAAAAAAAAA"
+"Hora 2025-10-15 12:14:55 id:Captura,part:24,data://///////v/+//7//v/+/////v/+////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//////7//f/9//3//P/9//3//f/+/////////wAAAAAAAAAAAAAAAAAA/////wAA////////////////AAABAAIAAgA"
+"Hora 2025-10-15 12:15:00 id:Captura,part:25,data:DAAMABAAEAAQABAADAAQABAADAAIAAgACAAMAAwADAAMAAwADAAQABQAEAAYABgAGAAUABwAHAAcABgAGAAUAAwADAAIAAQAAAAAAAAAAAAAAAAAAAAEAAQABAAIAAQABAAEAAgADAAMAAgACAAIAAwADAA"
+"Hora 2025-10-15 12:15:05 id:Captura,part:26,data:IAAgACAAIAAgACAAMAAgACAAIAAwAEAAMAAgACAAAAAAAAAP//AAD/////AAAAAAAAAAD//wAAAAABAAEAAwABAAEAAgABAAEAAQAAAAAAAQABAAAAAAAAAAAA//8AAP///////wAAAAAAAAAAAAAAAAAA/"
+"Hora 2025-10-15 12:15:10 id:Captura,part:27,data:/8AAP///v/+//7//f/8//v//f/8//3//f/9//7//v/+//////8AAAAA/////////v/+/////v/9//7//v/+////AAAAAAAAAAAAAAIAAwADAAMAAQABAAEAAAAAAP///f/8//z//P/8//v/+//7//v//P/8"
+"Hora 2025-10-15 12:15:15 id:Captura,part:28,data://3//f/9//7///8AAP//AAAAAAAAAAAAAAAAAAD+//3//f/+/wAAAAD//wAAAQABAAIAAgABAAIAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAAAA//////7//v/9//z/+//5//j/+P/3//j"
+"Hora 2025-10-15 12:15:20 id:Captura,part:29,data:/+P/5//r/+//8//v//P////3/+//6//r/+v/4//n/+f/4//j/+f/6//r//f8AAAEAAQAAAAAAAAAAAAAA///8//3//P/8//7//////wAAAAAAAAAAAQAEAAYABQAFAAUABQAFAAYABgAGAAQAAgACAAAAAA"
+"Hora 2025-10-15 12:15:25 id:Captura,part:30,data:AAAAEAAAABAAEAAwADAAIAAQABAAAAAAAAAP///////wAAAAAAAAAAAwAFAAYABQAFAAUABQAFAAQABAADAAEAAgABAAIABAAGAAgACgAKAAkABwAGAAQAAQAAAAAAAAD//////v/+//3//f/8//v//P/9/"
+"Hora 2025-10-15 12:15:30 id:Captura,part:31,data:/7///8AAAAAAgACAAIAAQAAAAAA/////wAAAAAAAP7//f////7//v//////AQAAAAEAAwACAAQAAwADAAMAAwABAAAAAAAAAAEAAgADAAUABQAEAAUABgAJAAgACAAFAAUABQAGAAcABwAGAAcACAAIAAgA"
+"Hora 2025-10-15 12:15:35 id:Captura,part:32,data:BgAGAAUABQAFAAQABAAEAAUABAAFAAUABQAEAAIAAgACAAMAAQAAAP///v8AAAAAAAAAAAAAAAD///7//v/8//z//f////7////+////AAD//////P/9//3//v/9//7//v/+////AAAAAAAA//8AAAEAAgA"
+"Hora 2025-10-15 12:15:40 id:Captura,part:33,data:CAAEAAQABAP7//v/7//z//f/8//3//f8AAAEAAgACAAMAAwACAAEA/v/9//z//f8AAAAAAAABAAMABgAIAAcABQAEAAYABAAEAAYABQAFAAQAAgAAAAEAAQACAAMAAQABAAEAAAABAP7//P/9//7///8AAA"
+"Hora 2025-10-15 12:15:45 id:Captura,part:34,data:AA/v/9//3//f/9//z/+//7//z//P/8//z//f/9//7//f/6//j/+f/6//r//P/8//7///////7///8AAAAAAAAAAP7//f/+//7/+//7//n/+//9//7//v8AAAAAAAAAAPz/+//9//3//P/7//v/+//7//3/A"
+"Hora 2025-10-15 12:15:50 id:Captura,part:35,data:AAAAAAAAQD//////////wAAAAAAAAEAAAABAAAAAAD9//7//P/7//r/+v/7//7/AAD+/wAABAAFAAQAAwAEAAQABgAGAAQABAAFAAUABAAFAAgACAAIAAkACQAKAAsACwAIAAwACwALAAgABwAHAAMAAgAC"
+"Hora 2025-10-15 12:15:55 id:Captura,part:36,data:AAAA///9//v//P/9//3/AAAAAP/////+//3/+//6//z/+v/5//n//f///////f/9////AAD///z//f/9//z//f8AAP//AAD////////7//j/9//1//T/9P/1//f/+v/4//X/9P/2//X/9P/z//D/8P/z//D"
+"Hora 2025-10-15 12:16:00 id:Captura,part:37,data:/7P/u//D/8P/v//H/8P/u/+//8v/0//L/8v/0//T/+P/7//v//P///wIAAwADAAQABgAGAAcABgAHAAcACAAIAAcABwAHAAcACQALAA8ADQAMAA4ADwAPAA8ADQANAA0ACgAIAAgABQAEAAUABAAEAAIAAw"
+"Hora 2025-10-15 12:16:05 id:Captura,part:38,data:AEAAMABAADAAEAAwAEAAQABAACAAAA/v/9//7//P/8//n/9//7//3//P/6//z/+//3//j/9//2//n/+//8//3//P/6//v/+//6//b/9P/2//X/8v/v/+//8v/1//b/9//1//T/+P/+/wAAAAACAAEA//8AA"
+"Hora 2025-10-15 12:16:10 id:Captura,part:39,data:AAAAAAAAP7//P/8//7///8CAAQABwANAA4ADgARABUAFwAXABcAGAAWABUAFAASABMAEgASABUAGAAZABwAHQAcABwAGgAZABYAEwAQAA0ACgAHAAYABQAHAAYABQAFAAcACAAGAAUAAwACAAEAAAAAAAAA"
+"Hora 2025-10-15 12:16:15 id:Captura,part:40,data:AAAAAP3//f/8//r/+//7//n/+v/9///////+/wAA/f/7//z//f/+/wAAAAAAAAAAAQAAAAEAAQABAAQABQAHAAYABQACAAIABAAFAAUABQAGAAQABwAIAAgACwAQABEADwAPABIAEwAMAAkACAAIAAUABAA"
+"Hora 2025-10-15 12:16:20 id:Captura,part:41,data:HAAcABQAIAAsADgAPABIAEwAQAA8ACgAHAAcACAAJAAYABAAEAAEAAAAEAAYACQAJAAQAAAAAAAAAAAD9//f/9f/1//j/9v/2//b/8v/0//X/+P/6//r//P/8//n/9v/4//r//P///wEAAAD+//3//P/7//"
+Hora 2025-10-15 12:25:38 Hola
+"{'id': '""!abcd6d61""', 'long_name': '""Manuel""', 'short_name': '""Man""', 'Hora': '2025-10-15 12:26:50'}"
+"{'id': '""!ae609ce8""', 'long_name': '""XIAO-Client""', 'short_name': '""XI01""', 'macaddr': '""\\230=\\256`\\234\\350""', 'hw_model': 'SEEED_XIAO_S3', 'public_key': '""\\324\\342\\t\\360\\324b\\200y \\311&\\355\\337Z\\231\\036\\000\\254\\034\\332\\332@E\\303\\032\\273)<\\tD\\316E""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 12:26:50'}"
+"{'id': '""!2ae93dc9""', 'long_name': '""T-1000""', 'short_name': '""Ja0""', 'macaddr': '""\\332\\027*\\351=\\311""', 'hw_model': 'TRACKER_T1000_E', 'role': 'TRACKER', 'public_key': '""\\375e\\307\\201\\260\\375\\020\\241A?\\254\\025\\214\\337p\\232\\000\\331\\005iB\\202<_\\321\\373t\\301i\\220\\247S""', 'Hora': '2025-10-15 12:26:53'}"
+"{'id': '""!abcd6d61""', 'long_name': '""Manuel""', 'short_name': '""Man""', 'Hora': '2025-10-15 12:27:39'}"
+"{'id': '""!abcd6d61""', 'long_name': '""Manuel""', 'short_name': '""Man""', 'Hora': '2025-10-15 12:32:09'}"
+"{'id': '""!ae609ce8""', 'long_name': '""XIAO-Client""', 'short_name': '""XI01""', 'macaddr': '""\\230=\\256`\\234\\350""', 'hw_model': 'SEEED_XIAO_S3', 'public_key': '""\\324\\342\\t\\360\\324b\\200y \\311&\\355\\337Z\\231\\036\\000\\254\\034\\332\\332@E\\303\\032\\273)<\\tD\\316E""', 'is_unmessagable': 'false', 'Hora': '2025-10-15 12:32:09'}"
+"{'id': '""!2ae93dc9""', 'long_name': '""T-1000""', 'short_name': '""Ja0""', 'macaddr': '""\\332\\027*\\351=\\311""', 'hw_model': 'TRACKER_T1000_E', 'role': 'TRACKER', 'public_key': '""\\375e\\307\\201\\260\\375\\020\\241A?\\254\\025\\214\\337p\\232\\000\\331\\005iB\\202<_\\321\\373t\\301i\\220\\247S""', 'Hora': '2025-10-15 12:32:09'}"
+Hora 2025-10-15 12:32:23 /home/alexg/Documentos/GitHub/Practica1_POO/venv/bin/python /home/alexg/Documentos/GitHub/Practica1_POO/src/mqttmain.py
+Hora 2025-10-15 12:32:39 quien tiene de nombre largo t-100?

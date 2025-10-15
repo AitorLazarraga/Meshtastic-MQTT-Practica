@@ -35,8 +35,19 @@ class MqttDispositivo:
 
         # Node Configuration
         self.random_hex_chars = ''.join(random.choices('0123456789abcdef', k=4))
-        self.node_name = '!abcd' + self.random_hex_chars
+
+        with open ("Datos/node_name.txt", "r+") as f:
+            nombre = f.read()
+            if not nombre:
+                self.node_name = '!abcd' + self.random_hex_chars
+                f.write(self.node_name)
+            else:
+                self.node_name = nombre
+        
         self.node_number = int(self.node_name.replace("!", ""), 16)
+        print("Nombre, Numero")
+        print(self.node_name)
+        print(self.node_number)
         self.client_short_name = "ALP"
         self.client_long_name = "Aitor_PC" + self.random_hex_chars
         self.lat = "0"

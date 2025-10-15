@@ -35,6 +35,7 @@ class MqttCliente:
             else:
                 print("Conexion fallida, reintentando en 3 segundos")
                 time.sleep(3)
+                #self.connector.connect_mqtt()
 
 if __name__ == "__main__":
     client = MqttCliente()
