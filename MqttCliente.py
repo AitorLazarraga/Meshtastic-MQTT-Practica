@@ -4,6 +4,8 @@ from src.MqttEnvio import MqttEnvio
 from src.MqttRecibo import MqttRecibo
 from meshtastic import BROADCAST_NUM
 from src.Interfaz import Interfaz
+from src.GUI import GUI
+import tkinter as tk
 import time
 
 class MqttCliente:
@@ -27,15 +29,23 @@ class MqttCliente:
         self.interface = Interfaz(connector=self.connector, receiver=self.receiver, sender=self.sender)
 
     def run(self):
-        """ Se conecta y se espera hasta estar preparado para iniciar la interfaz """
-        while True:
-            if self.connector.is_connected():
-                print("Conectado al broker MQTT")
-                self.interface.run()
-            else:
-                print("Conexion fallida, reintentando en 3 segundos")
-                time.sleep(3)
-                #self.connector.connect_mqtt()
+        """ Se conecta y se espera hasta estar preparado para iniciar la interfaz GUI """
+        # Esperar a que esté conectado
+        while not self.connector.is_connected():
+            print("Esperando conexión al broker MQTT...")
+            time.sleep(1)
+        
+        print("Conectado al broker MQTT")
+        
+        root = tk.Tk()
+        gui = GUI(
+            root,
+            connector=self.connector,
+            receiver=self.receiver,
+            sender=self.sender,
+            contactos=self.interface.contacto
+        )
+        root.mainloop()
 
 if __name__ == "__main__":
     client = MqttCliente()

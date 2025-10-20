@@ -65,3 +65,12 @@ class Contactos:
         else:
             contacto = resultado.iloc[0].to_dict()
             return contacto["ID"]
+        
+    def contactoNum(self, numero):
+        self.lista_contactos = pd.read_csv(self.ruta, converters={
+            "ID": lambda x: int(x.strip('"').replace("!", ""), 16),
+            "Nombre": lambda x: x.strip('"')
+            })
+        nombre = self.lista_contactos[self.lista_contactos["ID"] == numero]
+        nombre = nombre.iloc[0].to_dict()
+        return nombre["Nombre"]

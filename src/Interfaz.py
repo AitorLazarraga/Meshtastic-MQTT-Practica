@@ -8,12 +8,15 @@ import tkinter as tk
 from tkinter import filedialog
 from pathlib import Path
 from src.Contactos import Contactos
+from src.GUI import GUI
 
 class Interfaz:
     def __init__(self, connector, receiver, sender):
         self.sel = 0
         self.mensaje = ""
-        self.opciones = {1: "Enviar Mensaje",2: "Enviar Info Nodo", 3: "Enviar Position" ,4: "Ver Mensajes",5:"Cambiar Broker" ,6: "Salir"}
+        self.opciones = {1: "Enviar Mensaje",2: "Enviar Info Nodo", 3: "Enviar Position" ,4: "Ver Mensajes",5:"Cambiar Broker" ,6:"Enviar Posiciones", 7: "Salir"}
+
+        self.lista_coordenadas = []
 
         self.Encoder = ImageEncoder()
         self.contacto = Contactos()      
@@ -171,11 +174,64 @@ class Interfaz:
                     self.connector.connect_mqtt()
                 print(f"Broker actual: {self.connector.mqtt_broker}")
             case 6:
+                print("Enviar coordenadas")
+                print("Ingresa los datos de coordenadas, si Z = 0 se contará como que vas a enviar datos bidimensionales")
+                flagZ = True
+                while True:
+                    x = input("Ingrese dato para X")
+                    y = input("Ingrese dato para Y")
+                    if flagZ == True:
+                        z = input("Ingrese dato para Z")
+                        try:
+                            if float(z) == 0.0:
+                                flagZ = False
+                                z = None
+                            else:
+                                z = float(z)
+                        except ValueError:
+                            print("Dato no valido")
+                    else:
+                        z = None
+                    try:
+                        x = float(x)
+                        y = float(y)
+                    except ValueError:
+                        print("Datos no validos")
+                    
+                    if z is not None:
+                        dict_cords = {"X": x, "Y": y, "Z": z}
+                    else:
+                        dict_cords = {"X": x, "Y": y}
+
+                    self.lista_coordenadas.append(dict_cords)
+                    try:
+                        opcion = int(input("Pulsa 0 para enviar coordenadas, cualquier otra cosa para añadir mas"))
+                        if opcion == 0:
+                            self.mensaje = str(self.lista_coordenadas)
+                            self.sender.send_message(BROADCAST_NUM, self.mensaje)
+                            return
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        print("Añadiendo otra cordenada")
+            case 7:
                 print("Saliendo...")
                 self.connector.disconnect_mqtt()
                 exit()
             case _:
                 print("Opción no válida")
+
+    def run_gui(self):
+        """Inicia la interfaz gráfica"""
+        root = tk.Tk()
+        gui = GUI(
+            root,
+            connector=self.connector,
+            receiver=self.receiver,
+            sender=self.sender,
+            contactos=self.contacto
+        )
+        root.mainloop()
    
     def run(self):
         """Se muestra el menu y se espera a la entrada de usuario"""

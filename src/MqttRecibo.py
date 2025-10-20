@@ -42,6 +42,9 @@ class MqttRecibo:
         self.csv_fileGas = "Datos/GasSensor_data.csv"
         self.csv_fileSen = "Datos/WaterSensor.csv"
 
+        self.ultimo_mensaje = None  # Para que la GUI pueda leer el último mensaje
+        self.nuevos_mensajes = []   # Lista de mensajes nuevos para la GUI
+
 
     def ParseText(self,payload_str):
         """Funcion de parseo de string a diccionario python"""
@@ -220,10 +223,20 @@ class MqttRecibo:
 
         # Mensaje normal de texto
         self.n_mensaje += 1
-        pb_con_hora = "Hora" + " " + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb
+        persona = getattr(mp, 'from')
+        nombreper = self.contactos.contactoNum(persona)
+        if not nombreper:
+            nombreper = "¿?"
+        nombreper = str(nombreper)
+
+        pb_con_hora = "Hora" + " " + pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S') + " " + pb + " " + "recibido de " + nombreper
         self.mensajes[self.n_mensaje] = pb_con_hora
-        print(f"Mensaje: {pb_con_hora}")
-        print(f"Mensaje {self.n_mensaje} guardado")
+
+        self.ultimo_mensaje = pb_con_hora
+        self.nuevos_mensajes.append(pb_con_hora)
+
+        print(f"{pb_con_hora}")
+        #print(f"Mensaje {self.n_mensaje} guardado")
         
         #Al tener 10 o más mensajes se guardan y se borra el diccionario
         if self.n_mensaje % 10 == 0:
