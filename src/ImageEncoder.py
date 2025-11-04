@@ -87,4 +87,28 @@ class ImageEncoder:
 
         print(f"Debug: La imagen tiene {index} partes.")
         return partes, index # Devolver la lista de partes
+    
+    def reconstruir_imagen(self):
+        """Reconstruye una imagen recibida por partes"""
+        
+        print("Fin de recepción de imagen")
+        id_imagen = self.partes_imagen[0]['ID']
+        tipo_imagen = self.partes_imagen[0]['Format']
+        del self.partes_imagen[0]
+        
+        if len(self.partes_imagen) == self.partes_esperadas:
+            print("Todas las partes recibidas correctamente")
+            self.flag_imagen = False
+            self.partes_imagen.sort(key=lambda x: x['part'])
+            cadena_completa = ''.join([p['data'] for p in self.partes_imagen if 'data' in p])
+            ruta_salida = f"Datos/Imagenes/imagen_recibida_{id_imagen}.{tipo_imagen}"
+            print(f"Guardando imagen recibida como {ruta_salida}")
+            self.Encoder.cadena_a_imagen(self, cadena_completa, ruta_salida)
+
+        else:
+            print(f"Faltan partes de la imagen. Esperadas: {self.partes_esperadas}, Recibidas: {len(self.partes_imagen)}")
+            print(f"Partes recibidas: {self.partes_imagen}")
+        
+        self.flag_imagen = False
+        self.partes_imagen = []
 

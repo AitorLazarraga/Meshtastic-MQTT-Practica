@@ -6,6 +6,7 @@ import base64
 import random
 import re
 import time
+from src.decoradores import req_conexion
 
 class MqttEnvio:
     """Clase responsable de enviar mensajes y datos"""
@@ -16,6 +17,7 @@ class MqttEnvio:
         self.global_message_id = random.getrandbits(32)
         self.debug = connector.debug
 
+    @req_conexion
     def send_message(self, destination_id, message_text):
         """Envia un mensaje de texto"""
         if not self.cliente.is_connected():
@@ -54,6 +56,7 @@ class MqttEnvio:
         destination_id = int(destination_id[1:], 16)
         self._generate_mesh_packet(destination_id, encoded_message)
 
+    @req_conexion
     def send_node_info(self, destination_id, want_response):
         """Env�a informaci�n del nodo"""
         if self.cliente.is_connected():
@@ -72,6 +75,7 @@ class MqttEnvio:
             encoded_message.want_response = want_response
             self._generate_mesh_packet(destination_id, encoded_message)
 
+    @req_conexion
     def send_position(self, destination_id):
         """Env�a informaci�n de posici�n"""
         if self.cliente.is_connected():
@@ -107,6 +111,7 @@ class MqttEnvio:
         encoded_message.payload = b"\030\000"
         self._generate_mesh_packet(destination_id, encoded_message)
 
+    @req_conexion
     def send_img(self, destination_id, parts, total_parts, image_id, tipo_imagen):
         """Envia una imagen fragmentada"""
         if self.debug:

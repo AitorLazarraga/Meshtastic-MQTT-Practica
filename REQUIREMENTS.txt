@@ -2,8 +2,10 @@ meshtastic
 paho-mqtt
 cryptography
 pandas
-<<<<<<< HEAD
 pillow
-=======
-pillow
->>>>>>> d956901a894a6c6e50a3605d213952b66d9609ef
+pygame
+djitellopy
+opencv-python
+requests
+tkinter
+numpy

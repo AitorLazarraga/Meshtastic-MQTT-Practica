@@ -3,33 +3,30 @@ import os
 
 class Contactos:
     def __init__(self):
-        self.ruta = "Datos/PaginasAmarillas.csv"
+        self.rutapag = "Datos/PaginasAmarillas.csv"
         columnas = ["ID", "Nombre"]
 
-        if os.path.exists(self.ruta):
-            self.lista_contactos = pd.read_csv(self.ruta)
+        if os.path.exists(self.rutapag):
+            self.lista_contactos = pd.read_csv(self.rutapag)
         else:
             self.lista_contactos = pd.DataFrame(columns=columnas)
-            self.lista_contactos.to_csv(self.ruta, index=False)
+            self.lista_contactos.to_csv(self.rutapag, index=False)
 
     def _guardar(self):
         """Guarda la lista de contactos en el CSV."""
-        self.lista_contactos.to_csv(self.ruta, index=False)
+        self.lista_contactos.to_csv(self.rutapag, index=False)
 
     def anadir_contacto(self, contacto_id, nombre=None):
         """Añade un contacto si no existe."""
-        try:
-            contacto_id = str(contacto_id)
-            if "!" in contacto_id:
-                contacto_id = int(contacto_id.replace("!", ""), 16)
-        except ValueError:
-            pass
-        
+        # Asegurar que el ID sea string (para evitar errores de pandas)
+        contacto_id = str(contacto_id)
+
+        # Si ya existe, no lo añadimos
         if (self.lista_contactos["ID"] == contacto_id).any():
             return
 
         if nombre is None:
-            nombre = input("Añade un nombre para el nuevo contacto: ")
+            return
 
         nombre = nombre.lower()
 
@@ -40,7 +37,7 @@ class Contactos:
 
     def mostrar_contactos(self):
         """Muestra todos los contactos."""
-        self.lista_contactos = pd.read_csv(self.ruta, converters={
+        self.lista_contactos = pd.read_csv(self.rutapag, converters={
     "ID": lambda x: x.strip('"'),
     "Nombre": lambda x: x.strip('"')
 })
@@ -53,7 +50,7 @@ class Contactos:
     def elegir_contacto(self, nombre):
         """Busca y devuelve un contacto por nombre."""
         nombre = nombre.lower()
-        self.lista_contactos = pd.read_csv(self.ruta, converters={
+        self.lista_contactos = pd.read_csv(self.rutapag, converters={
     "ID": lambda x: x.strip('"'),
     "Nombre": lambda x: x.strip('"')
 })
@@ -67,10 +64,12 @@ class Contactos:
             return contacto["ID"]
         
     def contactoNum(self, numero):
-        self.lista_contactos = pd.read_csv(self.ruta, converters={
-            "ID": lambda x: int(x.strip('"').replace("!", ""), 16),
-            "Nombre": lambda x: x.strip('"')
-            })
-        nombre = self.lista_contactos[self.lista_contactos["ID"] == numero]
-        nombre = nombre.iloc[0].to_dict()
-        return nombre["Nombre"]
+        numero = str(numero)
+        self.lista_contactos = pd.read_csv(self.rutapag, dtype={"ID": str, "Nombre": str})
+
+        resultado = self.lista_contactos[self.lista_contactos["ID"] == numero]
+        if not resultado.empty:
+            return resultado.iloc[0]["Nombre"]
+        return None
+
+        

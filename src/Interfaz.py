@@ -72,18 +72,10 @@ class Interfaz:
                 match opcion_mensaje:
                     case 1:
                         self.mensaje = self.connector.message_text
-                        if self.connector.is_connected():
-                            self.sender.send_message(BROADCAST_NUM, self.mensaje)
-                        else:
-                            print("No estamos ready")
-                            self.connector.connect_mqtt()
+                        self.sender.send_message(BROADCAST_NUM, self.mensaje)
                     case 2:
                         self.mensaje = input("Escribe tu mensaje: ")
-                        if self.connector.is_connected():
-                            self.sender.send_message(BROADCAST_NUM, self.mensaje)
-                        else:
-                            print("No estamos ready")
-                            self.connector.connect_mqtt()
+                        self.sender.send_message(BROADCAST_NUM, self.mensaje)
                     case 3:
                         """Se usa tkinter para seleccion de archivo de imagen"""
                         root = tk.Tk()

@@ -1,10 +1,16 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
+import tkintermapview
 from PIL import Image, ImageTk
 import threading
 import time
 from pathlib import Path
 import os
+from src.map import VerMap
+from src.ProcesarMensajes import ProcesarMensajes, ProcesarPosicion, ProcesarTelemetria
+
+'''Cambiar para que cada pestaña sea un método separado y no una función dentro de la clase GUI
+Tras esto el GUI heredara de todas las clases, para solucionar el punto de herencia multiple'''
 
 class GUI:
     def __init__(self, root, connector, receiver, sender, contactos):
@@ -33,7 +39,8 @@ class GUI:
         self.crear_pestana_directos()
         self.crear_pestana_imagenes()
         self.crear_pestana_config()
-        
+        self.mapa = VerMap(self.notebook)
+        self.mapa.cargar_csv()
         # Barra de estado
         self.status_bar = tk.Label(self.root, text="Desconectado", bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
@@ -42,7 +49,7 @@ class GUI:
         self.actualizar_mensajes_thread()
         self.actualizar_estado_conexion()
         self.actualizar_imagenes_recibidas()
-        
+
     def crear_pestana_mensajes(self):
         """Pestaña principal de mensajes broadcast"""
         frame = ttk.Frame(self.notebook)
@@ -318,9 +325,14 @@ class GUI:
     def agregar_mensaje_canvas(self, mensaje, tag='recibido'):
         """Agrega un mensaje al canvas principal"""
         self.canvas_mensajes.config(state='normal')
-        self.canvas_mensajes.insert(tk.END, mensaje + '\n', tag)
-        self.canvas_mensajes.see(tk.END)
-        self.canvas_mensajes.config(state='disabled')
+        try:
+            self.canvas_mensajes.insert(tk.END, mensaje + '\n', tag)
+            self.canvas_mensajes.see(tk.END)
+            self.canvas_mensajes.config(state='disabled')
+        except:
+            self.canvas_mensajes.insert(tk.END, "FALLO DE RECEPCIÓN", tag)
+            self.canvas_mensajes.see(tk.END)
+            self.canvas_mensajes.config(state='disabled')
         
         # Limitar número de mensajes mostrados
         self.mensajes_mostrados.append(mensaje)
@@ -384,15 +396,34 @@ class GUI:
     def actualizar_mensajes_thread(self):
         """Actualiza el canvas con nuevos mensajes del receiver"""
         def verificar_mensajes():
-            # Verificar diccionario de mensajes del receiver
-            if hasattr(self.receiver, 'mensajes') and self.receiver.mensajes:
-                for key in sorted(self.receiver.mensajes.keys()):
-                    mensaje = str(self.receiver.mensajes[key])
-                    if mensaje not in self.mensajes_mostrados:
-                        self.agregar_mensaje_canvas(mensaje, 'recibido')
+            # Acceder a las instancias desde self.receiver
+            try:
+                # Procesar mensajes de texto
+                if hasattr(self.receiver.texto, 'nuevos_mensajes'):
+                    while len(self.receiver.texto.nuevos_mensajes) > 0:
+                        mensaje = self.receiver.texto.nuevos_mensajes.pop(0)
+                        self.agregar_mensaje_canvas(str(mensaje), 'recibido')
+                
+                # Procesar mensajes de telemetría
+                if hasattr(self.receiver.telemetria, 'nuevos_mensajes'):
+                    while len(self.receiver.telemetria.nuevos_mensajes) > 0:
+                        mensaje = self.receiver.telemetria.nuevos_mensajes.pop(0)
+                        # Si es un diccionario, convertir a string legible
+                        if isinstance(mensaje, dict):
+                            mensaje = f"Telemetría: {mensaje.get('long_name', '?')} - Hora: {mensaje.get('Hora', '?')}"
+                        self.agregar_mensaje_canvas(str(mensaje), 'recibido')
+                
+                # Procesar mensajes de posición
+                if hasattr(self.receiver.posicion, 'nuevos_mensajes'):
+                    while len(self.receiver.posicion.nuevos_mensajes) > 0:
+                        mensaje = self.receiver.posicion.nuevos_mensajes.pop(0)
+                        self.agregar_mensaje_canvas(str(mensaje), 'recibido')
+            
+            except Exception as e:
+                print(f"Error al actualizar mensajes en GUI: {e}")
             
             # Programar próxima verificación
-            self.root.after(1000, verificar_mensajes)
+            self.root.after(500, verificar_mensajes)  # Cada 500ms
         
         verificar_mensajes()
     

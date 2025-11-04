@@ -8,7 +8,7 @@ from src.GUI import GUI
 import tkinter as tk
 import time
 
-class MqttCliente:
+class main:
     def __init__(self):
         # Crear el dispositivo primero (pero no conectar aún)
         self.connector = MqttDispositivo()
@@ -48,5 +48,5 @@ class MqttCliente:
         root.mainloop()
 
 if __name__ == "__main__":
-    client = MqttCliente()
+    client = main()
     client.run()
