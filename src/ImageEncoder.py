@@ -1,25 +1,5 @@
 import base64
 from PIL import Image 
-"""
-Añadir una funcion para fragmentar la imagen en cadenas de 200bytes y enviarlas de una en una
-
-n_paquetes = len(cadena_base64) // 200
-n_paquetes = round(n_paquetes) + 1
-
-
-Cada una tiene que tener un identificador unico para luego reconstruir la imagen (Igual esto se puede hacer mandando diccionarios ID:Mensaje)
-Crear una funcion para reconstruir la imagen a partir de las cadenas recibidas (Si esta por diccionario primero guardarlos todos en lista, ordenar por Keys y luego sacar payloads)
-
-for key in sorted(mensajes.keys()):
-    lista_mensajes.append(mensajes[key])
-    
-Mandar mensaje de inicio y mensaje de fin de transmision indicando nº de paquetes
-
-Indicar al principio tamaño imagen, nº de paquetes, tipo imagen.
-
-{ID:ParteFoto}
-
-"""
 
 class ImageEncoder:
     def __init__(self):
@@ -30,7 +10,7 @@ class ImageEncoder:
         self.tipo_imagen = ""
         self.max_bytes = 200  # Máximo tamaño en bytes por fragmento
 
-    def imagen_a_cadena(self,ruta_imagen):
+    def imagen_a_cadena(self, ruta_imagen):
         """
         Convierte una imagen a una cadena Base64.
         """
@@ -47,7 +27,7 @@ class ImageEncoder:
         except Exception as e:
             return f"Ocurrió un error al procesar la imagen: {e}"
     
-    def cadena_a_imagen(self,cadena_base64, ruta_salida):
+    def cadena_a_imagen(self, cadena_base64, ruta_salida):
         """
         Convierte una cadena Base64 de vuelta a una imagen y la guarda.
         """
@@ -61,16 +41,12 @@ class ImageEncoder:
         except Exception as e:
             print(f"Ocurrió un error al guardar la imagen: {e}")
 
-
-    def fragmentar_payload(self,base64_data, id_imagen):
+    def fragmentar_payload(self, base64_data, id_imagen):
         partes = []
         index = 0
 
         while base64_data:
             # Buscamos cuántos caracteres caben en la cadena 'data'
-            #Para esto se itera a traves de un diccionario que ya tiene la id y la parte
-            #y se va aumentando el tamaño de data hasta que el tamaño en bytes del diccionario
-            #supere los max_bytes permitidos entonces se borra un caracter y se guarda esa parte
             for i in range(1, len(base64_data) + 1):
                 dic = {'id': id_imagen, 'part': index, 'data': base64_data[:i]}
                 literal = str(dic)
@@ -80,35 +56,57 @@ class ImageEncoder:
                     i -= 1
                     break
 
-            parte_dic = {'id': id_imagen, 'part': index, 'data': base64_data[:i]} # Crear el diccionario con la parte actual
-            partes.append(parte_dic) # Añadir la parte a la lista de partes
-            base64_data = base64_data[i:] # Actualizar la cadena base64 eliminando la parte ya procesada
+            parte_dic = {'id': id_imagen, 'part': index, 'data': base64_data[:i]}
+            partes.append(parte_dic)
+            base64_data = base64_data[i:]
             index += 1
 
         print(f"Debug: La imagen tiene {index} partes.")
-        return partes, index # Devolver la lista de partes
+        return partes, index
     
-    def reconstruir_imagen(self):
-        """Reconstruye una imagen recibida por partes"""
+    def reconstruir_imagen(self, procesador_texto):
+        """
+        Reconstruye una imagen recibida por partes.
         
+        Args:
+            procesador_texto: Instancia de Objeto procesador que contiene las partes de la imagen
+        """
         print("Fin de recepción de imagen")
-        id_imagen = self.partes_imagen[0]['ID']
-        tipo_imagen = self.partes_imagen[0]['Format']
-        del self.partes_imagen[0]
         
-        if len(self.partes_imagen) == self.partes_esperadas:
+        if not procesador_texto.partes_imagen:
+            print("Error: No hay partes de imagen para reconstruir")
+            procesador_texto.flag_imagen = False
+            return
+        
+        id_imagen = procesador_texto.partes_imagen[0].get('ID')
+        tipo_imagen = procesador_texto.partes_imagen[0].get('Format')
+        
+        # Eliminar el mensaje de inicio
+        del procesador_texto.partes_imagen[0]
+        
+        if len(procesador_texto.partes_imagen) == procesador_texto.partes_esperadas:
             print("Todas las partes recibidas correctamente")
-            self.flag_imagen = False
-            self.partes_imagen.sort(key=lambda x: x['part'])
-            cadena_completa = ''.join([p['data'] for p in self.partes_imagen if 'data' in p])
+            
+            # Ordenar por número de parte
+            procesador_texto.partes_imagen.sort(key=lambda x: x.get('part', 0))
+            
+            # Reconstruir la cadena completa
+            cadena_completa = ''.join([p['data'] for p in procesador_texto.partes_imagen if 'data' in p])
+            
+            # Guardar la imagen
             ruta_salida = f"Datos/Imagenes/imagen_recibida_{id_imagen}.{tipo_imagen}"
             print(f"Guardando imagen recibida como {ruta_salida}")
-            self.Encoder.cadena_a_imagen(self, cadena_completa, ruta_salida)
-
+            
+            # CORRECCIÓN: No pasar self como argumento
+            self.cadena_a_imagen(cadena_completa, ruta_salida)
+            
+            print(f"Imagen {id_imagen} guardada exitosamente")
         else:
-            print(f"Faltan partes de la imagen. Esperadas: {self.partes_esperadas}, Recibidas: {len(self.partes_imagen)}")
-            print(f"Partes recibidas: {self.partes_imagen}")
+            print(f"Faltan partes de la imagen. Esperadas: {procesador_texto.partes_esperadas}, Recibidas: {len(procesador_texto.partes_imagen)}")
+            print(f"Partes recibidas: {[p.get('part', '?') for p in procesador_texto.partes_imagen]}")
         
-        self.flag_imagen = False
-        self.partes_imagen = []
-
+        # Limpiar estado
+        procesador_texto.flag_imagen = False
+        procesador_texto.partes_imagen = []
+        procesador_texto.partes_esperadas = 0
+        procesador_texto.id_actual = None

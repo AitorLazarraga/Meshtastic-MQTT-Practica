@@ -32,7 +32,7 @@ class MqttRecibo:
         self.print_node_info = True
         self.print_node_position = True
         self.print_node_telemetry = True
-        self.Encoder = ImageEncoder
+        self.Encoder = ImageEncoder()
 
         self.csv_filePos = "Datos/posiciones.csv"
         self.csv_fileM = "Datos/mensajes.csv"

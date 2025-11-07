@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import filedialog
 from pathlib import Path
 from src.Contactos import Contactos
-from src.GUI import GUI
+from src.GUI_refactorizado import GUI
 
 class Interfaz:
     def __init__(self, connector, receiver, sender):

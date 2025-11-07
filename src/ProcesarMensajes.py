@@ -60,10 +60,6 @@ class ProcesarPosicion(ProcesarMensajes):
         self.ultimo_mensaje = mensaje_pos
         self.nuevos_mensajes.append(mensaje_pos)
 
-        # Actualizar también en el receiver para mantener compatibilidad
-        self.ultimo_mensaje = mensaje_pos
-        self.nuevos_mensajes.append(mensaje_pos)
-
         if hasattr(self.receiver, 'gui_callback'):
             self.receiver.gui_callback()
 
@@ -98,10 +94,6 @@ class ProcesarTelemetria(ProcesarMensajes):
 
         self.mensajes[self.n_mensaje] = pb_dict
         self.ultimo_mensaje = f"Mensaje de Telemetría recibido de {pb_dict.get('long_name', '¿?')}"
-        self.nuevos_mensajes.append(pb_dict)
-        
-        # Actualizar en receiver
-        self.ultimo_mensaje = self.ultimo_mensaje
         self.nuevos_mensajes.append(pb_dict)
         
         if self.n_mensaje % 10 == 0:
@@ -141,17 +133,33 @@ class ProcesarTexto(ProcesarMensajes):
             self.id_actual = pb_dict.get("ID")
             self.partes_esperadas = pb_dict.get("Total_parts")
             self.partes_imagen.append(pb_dict)
+            
+            # CORRECCIÓN: Sincronizar con receiver para que la GUI pueda leer estos valores
+            self.receiver.flag_imagen = True
+            self.receiver.partes_imagen = self.partes_imagen
+            self.receiver.partes_esperadas = self.partes_esperadas
+            self.receiver.id_actual = self.id_actual
             return
         
         # Partes de imagen
         if self.flag_imagen and pb_dict.get("id") == self.id_actual:
             self.partes_imagen.append(pb_dict)
-            print(f"Parte guardada: {pb_dict}")
+            print(f"Parte {pb_dict.get('part', '?')} de {self.partes_esperadas} recibida")
+            
+            # CORRECCIÓN: Sincronizar con receiver
+            self.receiver.partes_imagen = self.partes_imagen
             return
 
         # Fin de imagen
         if pb_dict.get("Estado") == "FIN_IMAGEN" and self.flag_imagen:
+            print(f"Mensaje de fin de imagen recibido. Total partes: {len(self.partes_imagen)}")
             self.receiver.Encoder.reconstruir_imagen(self)
+            
+            # CORRECCIÓN: Limpiar también en receiver
+            self.receiver.flag_imagen = False
+            self.receiver.partes_imagen = []
+            self.receiver.partes_esperadas = 0
+            self.receiver.id_actual = None
             return
 
         # Mensaje normal de texto
@@ -165,10 +173,6 @@ class ProcesarTexto(ProcesarMensajes):
 
         pb_con_hora = f"Hora {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')} {pb} recibido de {nombreper}"
         self.mensajes[self.n_mensaje] = pb_con_hora
-        self.ultimo_mensaje = pb_con_hora
-        self.nuevos_mensajes.append(pb_con_hora)
-        
-        # Actualizar en receiver
         self.ultimo_mensaje = pb_con_hora
         self.nuevos_mensajes.append(pb_con_hora)
 
