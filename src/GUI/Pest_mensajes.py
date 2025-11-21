@@ -7,11 +7,13 @@ from pathlib import Path
 class PestanaMensajes:
     """Pestaña principal de mensajes broadcast"""
     
-    def __init__(self, notebook, connector, receiver, sender):
+    def __init__(self, notebook, connector, receiver, sender, serial_receiver):
         self.notebook = notebook
         self.connector = connector
         self.receiver = receiver
         self.sender = sender
+        self.modo_envio = tk.StringVar(value="mqtt")
+        self.serial_receiver = serial_receiver  # NUEVO
         
         # Variables de control
         self.mensajes_mostrados = []
@@ -45,10 +47,30 @@ class PestanaMensajes:
         self.canvas_mensajes.tag_config('recibido', foreground='blue')
         self.canvas_mensajes.tag_config('enviado', foreground='green')
         self.canvas_mensajes.tag_config('sistema', foreground='red')
+        self.canvas_mensajes.tag_config('serial', foreground='purple')
         
         # Frame inferior para enviar mensajes
         frame_envio = ttk.LabelFrame(self.frame, text="Enviar Mensaje", padding=10)
         frame_envio.pack(fill='x', padx=5, pady=5)
+
+        frame_modo = ttk.Frame(frame_envio)
+        frame_modo.pack(side='left', padx=5)
+        tk.Label(frame_modo, text="Enviar por:").pack(side='top')
+        radio_mqtt = ttk.Radiobutton(
+            frame_modo, 
+            text="MQTT", 
+            variable=self.modo_envio, 
+            value="mqtt"
+        )
+        radio_mqtt.pack(side='left')
+        
+        radio_serial = ttk.Radiobutton(
+            frame_modo, 
+            text="Serial", 
+            variable=self.modo_envio, 
+            value="serial"
+        )
+        radio_serial.pack(side='left')
         
         # Entry para escribir mensaje
         tk.Label(frame_envio, text="Mensaje:").pack(side='left', padx=5)
@@ -99,22 +121,42 @@ class PestanaMensajes:
             self.canvas_mensajes.config(state='disabled')
     
     def enviar_mensaje_broadcast(self):
-        """Envía un mensaje a broadcast"""
+        """Envía un mensaje a broadcast o por serial según el modo seleccionado"""
         mensaje = self.entry_mensaje.get().strip()
         if not mensaje:
             return
         
-        if not self.connector.is_connected():
-            messagebox.showwarning("Advertencia", "No estás conectado al broker")
-            return
+        modo = self.modo_envio.get()
         
-        try:
-            from meshtastic import BROADCAST_NUM
-            self.sender.send_message(BROADCAST_NUM, mensaje)
-            self.agregar_mensaje(f"[ENVIADO] {mensaje}", 'enviado')
-            self.entry_mensaje.delete(0, tk.END)
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al enviar mensaje: {str(e)}")
+        if modo == "serial":
+            # Enviar por serial
+            if self.serial_receiver is None:
+                messagebox.showwarning("Advertencia", "Receptor serial no configurado")
+                return
+            
+            if not self.serial_receiver.is_connected():
+                messagebox.showwarning("Advertencia", "Puerto serial no conectado")
+                return
+            
+            try:
+                if self.sender.send_message_serial(mensaje):
+                    self.agregar_mensaje(f"[SERIAL ENVIADO] {mensaje}", 'enviado')
+                    self.entry_mensaje.delete(0, tk.END)
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al enviar por serial: {str(e)}")
+        
+        else:  # modo == "mqtt"
+            if not self.connector.is_connected():
+                messagebox.showwarning("Advertencia", "No estás conectado al broker MQTT")
+                return
+            
+            try:
+                from meshtastic import BROADCAST_NUM
+                self.sender.send_message(BROADCAST_NUM, mensaje)
+                self.agregar_mensaje(f"[MQTT ENVIADO] {mensaje}", 'enviado')
+                self.entry_mensaje.delete(0, tk.END)
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al enviar por MQTT: {str(e)}")
     
     def enviar_imagen_broadcast(self):
         """Envía una imagen a broadcast"""
@@ -170,6 +212,11 @@ class PestanaMensajes:
                     while len(self.receiver.posicion.nuevos_mensajes) > 0:
                         mensaje = self.receiver.posicion.nuevos_mensajes.pop(0)
                         self.agregar_mensaje(str(mensaje), 'recibido')
+
+                if self.serial_receiver and hasattr(self.serial_receiver, 'nuevos_mensajes'):
+                    while len(self.serial_receiver.nuevos_mensajes) > 0:
+                        mensaje = self.serial_receiver.nuevos_mensajes.pop(0)
+                        self.agregar_mensaje(str(mensaje), 'serial')
             
             except Exception as e:
                 print(f"Error al actualizar mensajes: {e}")

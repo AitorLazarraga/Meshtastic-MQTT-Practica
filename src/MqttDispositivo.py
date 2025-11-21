@@ -33,6 +33,10 @@ class MqttDispositivo:
         self.channel = "TestMQTT"
         self.key = "ymACgCy9Tdb8jHbLxUxZ/4ADX+BWLOGVihmKHcHTVyo="
 
+        self.portS = '/dev/ttyACM0'
+        self.baudrateS = 115200
+        self.serial = False
+
         # Node Configuration
         self.random_hex_chars = ''.join(random.choices('0123456789abcdef', k=4))
 

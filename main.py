@@ -6,6 +6,8 @@ from meshtastic import BROADCAST_NUM
 from src.Interfaz import Interfaz
 from src.GUI_refactorizado import GUI
 from src.GUI.Pest_dron import Pest_dron
+from src.ReceptorSerial import ReceptorSerial
+from threading import Thread
 import tkinter as tk
 import time
 
@@ -20,16 +22,32 @@ class main:
         # Asegurar que el objeto client existe y tiene callbacks configurados
         self.connector.create_client_and_callbacks(on_message_callback=self.receiver.on_message)
 
-        # Crear sender (usa connector.client que ya existe)
-        self.sender = MqttEnvio(self.connector)
 
         # Finalmente conectar
         self.connector.connect_mqtt()
 
-        # Pasar las instancias a Interfaz para que use las mismas
-        self.interface = Interfaz(connector=self.connector, receiver=self.receiver, sender=self.sender)
+        self.serial_receiver = ReceptorSerial(connector=self.connector)
+            
+        if self.serial_receiver.conectar():
+            print("✓ Serial conectado correctamente")
+            self.connector.serial_enabled = True
+            self.serial_receiver.enviar_mensaje("Conexion a puerto serial siuuu")
+            
+                # Iniciar hilo de escucha serial
+            Thread(
+                target=self.serial_receiver.escuchar_continuo, 
+                args=(False, False), 
+                daemon=True
+            ).start()
+        else:
+            print("✗ No se pudo conectar al puerto serial")
+            self.serial_receiver = None
         
         self.retrys = 0
+
+        self.sender = MqttEnvio(self.connector, serial_receiver=self.serial_receiver)
+
+        self.interface = Interfaz(connector=self.connector, receiver=self.receiver, sender=self.sender)
 
     def run(self):
         """ Se conecta y se espera hasta estar preparado para iniciar la interfaz GUI """
@@ -41,6 +59,7 @@ class main:
                 print("No se pudo conectar al broker MQTT")
                 opt = input("Quieres abrir la interfaz del dron? (0/1) \n")
                 if opt == "1":
+                    Thread(target=self.serial.escuchar_continuo, args=(True, True), daemon=True).start()
                     root = tk.Tk()
                     gui = GUI(
                             root,
@@ -48,7 +67,8 @@ class main:
                             receiver=self.receiver,
                             sender=self.sender,
                             contactos=self.interface.contacto,
-                            onlydron=True
+                            onlydron=False,
+                            serial_receiver=self.serial_receiver
                         )
                     root.mainloop()
                 elif opt != "1":
@@ -65,7 +85,8 @@ class main:
             receiver=self.receiver,
             sender=self.sender,
             contactos=self.interface.contacto,
-            onlydron=False
+            onlydron=False,
+            serial_receiver=self.serial_receiver
         )
         root.mainloop()
 

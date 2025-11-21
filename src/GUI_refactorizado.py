@@ -13,7 +13,7 @@ from src.GUI.Pest_dron import Pest_dron
 class GUI:
     """Interfaz gráfica principal - Coordinador de pestañas"""
     
-    def __init__(self, root, connector=None, receiver=None, sender=None, contactos=None, onlydron=False):
+    def __init__(self, root, connector=None, receiver=None, sender=None, contactos=None, onlydron=False, serial_receiver=None):
         self.root = root
         self.root.title("Meshtastic MQTT Client")
         self.root.geometry("900x700")
@@ -23,7 +23,11 @@ class GUI:
         self.receiver = receiver
         self.sender = sender
         self.contactos = contactos
-        
+        self.serial_receiver = serial_receiver  # NUEVO
+    
+    # Variable para modo de envío
+        self.modo_envio = tk.StringVar(value="mqtt")
+
         # Crear el notebook (pestañas)
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill='both', expand=True, padx=5, pady=5)
@@ -34,7 +38,8 @@ class GUI:
                 self.notebook, 
                 self.connector, 
                 self.receiver, 
-                self.sender
+                self.sender,
+                self.serial_receiver
             )
             
             self.pestana_directos = PestanaDirectos(
@@ -78,20 +83,26 @@ class GUI:
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
         
         # Iniciar actualización de estado de conexión
-        self._actualizar_estado_conexion()
+        self.actualizar_estado_conexion()
     
-    def _actualizar_estado_conexion(self):
+    def actualizar_estado_conexion(self):
         """Actualiza la barra de estado con el estado de conexión"""
         def verificar_estado():
-            if self.connector.is_connected():
+            mqtt_conn = "MQTT: ✓" if self.connector.is_connected() else "MQTT: ✗"
+            
+            serial_conn = "Serial: ✓" if (self.serial_receiver and self.serial_receiver.is_connected()) else "Serial: ✗"
+            
+            texto_estado = f"{mqtt_conn} | {serial_conn} | Broker: {self.connector.mqtt_broker}"
+            
+            if self.connector.is_connected() or (self.serial_receiver and self.serial_receiver.is_connected()):
                 self.status_bar.config(
-                    text=f"Conectado a: {self.connector.mqtt_broker}",
+                    text=texto_estado,
                     bg='#4CAF50',
                     fg='white'
                 )
             else:
                 self.status_bar.config(
-                    text="Desconectado",
+                    text=texto_estado,
                     bg='#F44336',
                     fg='white'
                 )

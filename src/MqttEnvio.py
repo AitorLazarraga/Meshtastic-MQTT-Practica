@@ -6,16 +6,18 @@ import base64
 import random
 import re
 import time
-from src.decoradores import req_conexion
+from src.decoradores import req_conexion, req_serial
+import serial
 
 class MqttEnvio:
     """Clase responsable de enviar mensajes y datos"""
     
-    def __init__(self, connector):
+    def __init__(self, connector, serial_receiver=None):
         self.connector = connector
         self.cliente = connector.client
         self.global_message_id = random.getrandbits(32)
-        self.debug = connector.debug
+        self.debug = connector
+        self.serial_receiver = serial_receiver
 
     @req_conexion
     def send_message(self, destination_id, message_text):
@@ -28,6 +30,34 @@ class MqttEnvio:
             encoded_message.portnum = portnums_pb2.TEXT_MESSAGE_APP
             encoded_message.payload = message_text.encode("utf-8")
             self._generate_mesh_packet(destination_id, encoded_message)
+
+    #@req_serial
+    def send_message_serial(self, message_text):
+        """Envía un mensaje de texto a través del puerto serial"""
+        try:
+            resultado = self.serial_receiver.enviar_mensaje(message_text)
+            if resultado and self.debug:
+                print(f"✓ Mensaje enviado por serial: {message_text}")
+            return resultado
+        except Exception as e:
+            if self.debug:
+                print(f"✗ Error al enviar mensaje por serial: {e}")
+            return False
+        
+    def send_message_dual(self, destination_id, message_text, usar_serial=False):
+        """
+        Envía un mensaje por MQTT, Serial o ambos
+        
+        Args:
+            destination_id: ID de destino para MQTT
+            message_text: Texto del mensaje
+            usar_serial: True para enviar por serial, False para MQTT
+        """
+        if usar_serial:
+            return self.send_message_serial(message_text)
+        else:
+            return self.send_message(destination_id, message_text)
+
 
     def direct_message(self, destination_id, message_text=None):
         """Env�a un mensaje directo a un nodo espec�fico"""

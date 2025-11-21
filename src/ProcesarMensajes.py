@@ -170,6 +170,9 @@ class ProcesarTexto(ProcesarMensajes):
         if not nombreper:
             nombreper = "¿?"
         nombreper = str(nombreper)
+        
+        if nombreper == " Yo_Mismo_Mismito":
+            return
 
         pb_con_hora = f"Hora {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')} {pb} recibido de {nombreper}"
         self.mensajes[self.n_mensaje] = pb_con_hora
