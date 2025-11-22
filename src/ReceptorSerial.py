@@ -7,15 +7,24 @@ import serial
 import time
 from datetime import datetime
 import re
+from src.Contactos import Contactos
 
 class ReceptorSerial:
     def __init__(self, connector=None):
         """Inicializa el receptor serial"""
         self.connector = connector
-        self.puerto = connector.portS if connector else '/dev/ttyUSB0'
+        self.puerto = connector.portS if connector else '/dev/ttyACM0'
         self.baudrate = connector.baudrateS if connector else 115200
         self.serial = None
         self.conectado = False
+        self.puertoE = '/dev/ttyUSB0'  # Puerto para enviar comandos (si es diferente)
+        self.palabrasDesp = ['DESPEGUE', 'ARRIBA', 'VOLAR', 'SUBIR', 'ELEVAR', 'DESPEGAR']
+        self.palabrasAterrizaje = ['ATERRIZAJE', 'ABAJO', 'BAJAR', 'DESCENDER', 'ATERRIZAR', 'SUELO', 'BAJA']
+        self.palabrasMov = ['ADELANTE', 'ATRAS', 'IZQUIERDA', 'DERECHA', 'FRENTE', 'RETROCEDER', 'LEFT', 'RIGHT', 'FORWARD', 'BACKWARD']
+        self.palabrasCamara = ['FOTO', 'IMAGEN', 'CAPTURA', 'PICTURE', 'PHOTO', 'SNAP']
+        self.condron = None
+
+        self.contacto = Contactos()
         
         # Listas para GUI (similar a MqttRecibo)
         self.mensajes = {}
@@ -63,6 +72,8 @@ class ReceptorSerial:
                 timeout=1,
                 rtscts=True
             )
+
+            self.serEnv = serial.Serial(port=self.puertoE, baudrate=self.baudrate, timeout=1, rtscts=True)
             '''
             parity=serial.PARITY_NONE,
                 stopbits=serial.STOPBITS_ONE,
@@ -71,10 +82,15 @@ class ReceptorSerial:
             # Limpiar buffers
             self.serial.reset_input_buffer()
             self.serial.reset_output_buffer()
+            self.serEnv.reset_input_buffer()
+            self.serEnv.reset_output_buffer()
             
             self.conectado = True
             print(f"✓ Conectado a {self.puerto} @ {self.baudrate} baudios")
             print(f"  Esperando mensajes...\n")
+            print("=" * 60)
+            print(f"✓ Conectado a {self.puertoE} @ {self.baudrate} baudios")
+            print(f"  Esperando para enviar...\n")
             print("=" * 60)
             return True
             
@@ -121,14 +137,56 @@ class ReceptorSerial:
                 # Extraer remitente si existe
                 remitente = datos_parseados.get('from', 'Desconocido')
                 
+                print(remitente)
+                nombre = self.contacto.contactoNum(remitente)
+                print(nombre)
+                nombre if nombre != None else '¿?'
+                print(nombre)
+
+
                 # Construir mensaje formateado
                 self.n_mensaje += 1
-                mensaje_formateado = f"[{timestamp}] Serial - {remitente}: {texto_msg}"
+                mensaje_formateado = f"[{timestamp}] Serial - {nombre}: {texto_msg}"
+
+                self.mensajes[self.n_mensaje] = mensaje_formateado 
                 
-                # Guardar en diccionario y listas
-                self.mensajes[self.n_mensaje] = mensaje_formateado
-                self.ultimo_mensaje = mensaje_formateado
-                self.nuevos_mensajes.append(mensaje_formateado)
+                print(texto_msg)
+                if texto_msg.upper() in self.palabrasDesp:
+                    self.condron.despegar()
+                    self.mensajes[self.n_mensaje] += "🚀"
+                    self.ultimo_mensaje = "🚀"
+                    self.nuevos_mensajes.append("🚀")
+
+                elif texto_msg.upper() in self.palabrasAterrizaje:
+                    self.condron.aterrizar()
+                    self.mensajes[self.n_mensaje] += "🛬"
+                    self.ultimo_mensaje = "🛬"
+                    self.nuevos_mensajes.append("🛬")
+
+                elif texto_msg.upper() in self.palabrasMov:
+                    if texto_msg.upper() in ["ADELANTE", "FRENTE", "FORWARD"]:
+                        self.condron.adelante()
+                    elif texto_msg.upper() in ["ATRAS", "RETROCEDER", "BACKWARD"]:
+                        self.condron.atras()
+                    elif texto_msg.upper() in ["IZQUIERDA", "LEFT"]:
+                        self.condron.mov_izda()
+                    elif texto_msg.upper() in ["DERECHA", "RIGHT"]:
+                        self.condron.mov_dcha()
+                    self.mensajes[self.n_mensaje] += "🛩️"
+                    self.ultimo_mensaje = "🛩️"
+                    self.nuevos_mensajes.append("🛩️")
+
+                elif texto_msg.upper() in self.palabrasCamara:
+                    self.condron.img()
+                    self.mensajes[self.n_mensaje] += "📸"
+                    self.ultimo_mensaje = "📸"
+                    self.nuevos_mensajes.append("📸")
+                
+                else:
+                    # Guardar en diccionario y listas
+                    self.mensajes[self.n_mensaje] = mensaje_formateado
+                    self.ultimo_mensaje = mensaje_formateado
+                    self.nuevos_mensajes.append(mensaje_formateado)
                 
                 print(f"✉️  Mensaje procesado: {mensaje_formateado}")
                 
@@ -196,13 +254,8 @@ class ReceptorSerial:
     
     def enviar_mensaje(self, mensaje):
         """Envía un mensaje por el puerto serial"""
-        if not self.conectado or not self.serial:
-            print("✗ Puerto serial no conectado")
-            return False
-        
         try:
-            time.sleep(1)
-            self.serial.write((mensaje + '\r\n').encode('utf-8'))
+            self.serEnv.write((mensaje + '\n').encode('utf-8'))
             print(f"✓ Mensaje enviado por serial: {mensaje}")
             return True
         except serial.SerialException as e:

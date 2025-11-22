@@ -59,17 +59,18 @@ class main:
                 print("No se pudo conectar al broker MQTT")
                 opt = input("Quieres abrir la interfaz del dron? (0/1) \n")
                 if opt == "1":
-                    Thread(target=self.serial.escuchar_continuo, args=(True, True), daemon=True).start()
                     root = tk.Tk()
                     gui = GUI(
-                            root,
-                            connector=self.connector,
-                            receiver=self.receiver,
-                            sender=self.sender,
-                            contactos=self.interface.contacto,
-                            onlydron=False,
-                            serial_receiver=self.serial_receiver
-                        )
+                                root,
+                                connector=self.connector,
+                                receiver=self.receiver,
+                                sender=self.sender,
+                                contactos=self.interface.contacto,
+                                onlydron=False,
+                                serial_receiver=self.serial_receiver
+                            )
+                    self.gui = gui
+                    self.serial_receiver.condron = gui.controlador
                     root.mainloop()
                 elif opt != "1":
                     exit()
@@ -77,7 +78,6 @@ class main:
             time.sleep(1)
         
         print("Conectado al broker MQTT")
-        
         root = tk.Tk()
         gui = GUI(
             root,
@@ -88,6 +88,8 @@ class main:
             onlydron=False,
             serial_receiver=self.serial_receiver
         )
+        self.gui = gui
+        self.serial_receiver.condron = gui.controlador
         root.mainloop()
 
 if __name__ == "__main__":

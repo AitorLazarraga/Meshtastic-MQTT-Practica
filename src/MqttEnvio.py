@@ -18,6 +18,7 @@ class MqttEnvio:
         self.global_message_id = random.getrandbits(32)
         self.debug = connector
         self.serial_receiver = serial_receiver
+        
 
     @req_conexion
     def send_message(self, destination_id, message_text):
@@ -35,10 +36,7 @@ class MqttEnvio:
     def send_message_serial(self, message_text):
         """Envía un mensaje de texto a través del puerto serial"""
         try:
-            resultado = self.serial_receiver.enviar_mensaje(message_text)
-            if resultado and self.debug:
-                print(f"✓ Mensaje enviado por serial: {message_text}")
-            return resultado
+            self.serial_receiver.enviar_mensaje(message_text)
         except Exception as e:
             if self.debug:
                 print(f"✗ Error al enviar mensaje por serial: {e}")

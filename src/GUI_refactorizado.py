@@ -8,6 +8,7 @@ from src.GUI.Pest_img import PestanaImagenes
 from src.GUI.Pest_config import PestanaConfig
 from src.GUI.Pest_map import VerMap
 from src.GUI.Pest_dron import Pest_dron
+from src.ConDron import ConDron
 
 
 class GUI:
@@ -23,7 +24,8 @@ class GUI:
         self.receiver = receiver
         self.sender = sender
         self.contactos = contactos
-        self.serial_receiver = serial_receiver  # NUEVO
+        self.serial_receiver = serial_receiver 
+        self.controlador = ConDron() 
     
     # Variable para modo de envío
         self.modo_envio = tk.StringVar(value="mqtt")
@@ -62,6 +64,13 @@ class GUI:
                 self.pestana_mensajes  # Para poder agregar mensajes del sistema
             )
             
+            self.pestana_dron = Pest_dron(
+                self.notebook,
+                self.receiver
+            )
+
+            self.controlador.set_pestana(self.pestana_dron)
+
             self.mapa = VerMap(self.notebook)
             self.mapa.cargar_csv()
             
