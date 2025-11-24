@@ -85,11 +85,11 @@ class main:
             receiver=self.receiver,
             sender=self.sender,
             contactos=self.interface.contacto,
-            onlydron=False,
+            onlydron=True,
             serial_receiver=self.serial_receiver
         )
         self.gui = gui
-        self.serial_receiver.condron = gui.controlador
+        #self.serial_receiver.condron = gui.controlador if gui.condron else None
         root.mainloop()
 
 if __name__ == "__main__":

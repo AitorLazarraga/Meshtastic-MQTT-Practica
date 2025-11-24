@@ -21,7 +21,7 @@ class ReceptorSerial:
         self.palabrasDesp = ['DESPEGUE', 'ARRIBA', 'VOLAR', 'SUBIR', 'ELEVAR', 'DESPEGAR']
         self.palabrasAterrizaje = ['ATERRIZAJE', 'ABAJO', 'BAJAR', 'DESCENDER', 'ATERRIZAR', 'SUELO', 'BAJA']
         self.palabrasMov = ['ADELANTE', 'ATRAS', 'IZQUIERDA', 'DERECHA', 'FRENTE', 'RETROCEDER', 'LEFT', 'RIGHT', 'FORWARD', 'BACKWARD']
-        self.palabrasCamara = ['FOTO', 'IMAGEN', 'CAPTURA', 'PICTURE', 'PHOTO', 'SNAP']
+        self.palabrasCamara = ['FOTO', 'IMAGEN', 'CAPTURA', 'PICTURE', 'PHOTO', 'SNAP', 'IMAGE']
         self.condron = None
 
         self.contacto = Contactos()
@@ -184,6 +184,7 @@ class ReceptorSerial:
                 
                 else:
                     # Guardar en diccionario y listas
+                    mensaje_formateado = texto_limpio
                     self.mensajes[self.n_mensaje] = mensaje_formateado
                     self.ultimo_mensaje = mensaje_formateado
                     self.nuevos_mensajes.append(mensaje_formateado)

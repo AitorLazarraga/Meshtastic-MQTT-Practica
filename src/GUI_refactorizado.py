@@ -71,14 +71,42 @@ class GUI:
 
             self.controlador.set_pestana(self.pestana_dron)
 
+            self.pestana_dron.set_envio_imagen_callback(self.pestana_mensajes.enviar_imagen_broadcast)
+
+
             self.mapa = VerMap(self.notebook)
             self.mapa.cargar_csv()
             
         elif onlydron == True:
-            self.pestana_dron = Pest_dron(
+            # Crear las pestañas (ahora son objetos independientes)
+            self.pestana_mensajes = PestanaMensajes(
+                self.notebook, 
+                self.connector, 
+                self.receiver, 
+                self.sender,
+                self.serial_receiver
+            )
+            
+            self.pestana_directos = PestanaDirectos(
+                self.notebook,
+                self.connector,
+                self.receiver,
+                self.sender,
+                self.contactos
+            )
+            
+            self.pestana_imagenes = PestanaImagenes(
                 self.notebook,
                 self.receiver
             )
+            
+            self.pestana_config = PestanaConfig(
+                self.notebook,
+                self.connector,
+                self.sender,
+                self.pestana_mensajes  # Para poder agregar mensajes del sistema
+            )
+            
         
 
         # Barra de estado

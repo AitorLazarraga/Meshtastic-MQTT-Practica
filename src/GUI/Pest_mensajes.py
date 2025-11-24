@@ -158,12 +158,16 @@ class PestanaMensajes:
             except Exception as e:
                 messagebox.showerror("Error", f"Error al enviar por MQTT: {str(e)}")
     
-    def enviar_imagen_broadcast(self):
+    def enviar_imagen_broadcast(self, imagen=None):
         """Envía una imagen a broadcast"""
-        foto = filedialog.askopenfilename(
-            title="Selecciona una Imagen para Enviar",
-            filetypes=[("Imágenes", "*.png *.jpg *.jpeg"), ("Todos", "*.*")]
-        )
+        if not imagen:
+            foto = filedialog.askopenfilename(
+                title="Selecciona una Imagen para Enviar",
+                filetypes=[("Imágenes", "*.png *.jpg *.jpeg"), ("Todos", "*.*")]
+            )
+        else:
+            foto = imagen
+            print(foto)
         
         if not foto:
             return
@@ -180,7 +184,10 @@ class PestanaMensajes:
             partes_imagen, cantidad_paquetes = encoder.fragmentar_payload(cadena64, id_imagen)
             
             def enviar_thread():
-                self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
+                if self.connector.is_connected():
+                    self.sender.send_img(BROADCAST_NUM, partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
+                else:
+                    self.sender.send_serial_img(partes_imagen, cantidad_paquetes, id_imagen, tipo_imagen)
                 self.agregar_mensaje(f"[SISTEMA] Imagen '{id_imagen}' enviada correctamente", 'sistema')
             
             threading.Thread(target=enviar_thread, daemon=True).start()

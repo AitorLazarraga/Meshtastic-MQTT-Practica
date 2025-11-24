@@ -18,6 +18,8 @@ class Pest_dron:
         self.notebook = notebook
         self.receiver = receiver
 
+        self.envio_imagen_callback = None
+
         self.gesture_thread = None
         self.last_processed_frame = None
 
@@ -240,8 +242,7 @@ class Pest_dron:
     def _cmd_takeoff(self):
         try:
             if self.drone:
-                print("Ha despegado")
-                #self.drone.takeoff()
+                self.drone.takeoff()
         except Exception as e:
             messagebox.showerror("Takeoff", f"Error al despegar: {e}")
 
@@ -260,6 +261,9 @@ class Pest_dron:
                     filename = f"Datos/Imagenes/dron_snapshot_{int(time.time())}.jpg"
                     cv2.imwrite(filename, frame)
                     messagebox.showinfo("Snapshot", f"Guardado como {filename}")
+                    if self.envio_imagen_callback:
+                        messagebox.showinfo("Snapshot", "Enviando imagen")
+                        self.envio_imagen_callback(imagen=filename)
                 else:
                     messagebox.showwarning("Snapshot", "Frame no disponible")
         except Exception as e:
@@ -272,6 +276,9 @@ class Pest_dron:
                 messagebox.showinfo("Batería", f"{bat}%")
         except Exception as e:
             messagebox.showerror("Batería", f"Error al leer batería: {e}")
+
+    def set_envio_imagen_callback(self, callback):
+        self.envio_imagen_callback = callback
 
     # ---------- Teclado (press / release) ----------
     def _on_key_press(self, event):
