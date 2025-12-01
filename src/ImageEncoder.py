@@ -1,7 +1,10 @@
 import base64
 from PIL import Image 
+from typing import TypeVar, Generic, List, Tuple, Dict
 
-class ImageEncoder:
+T = TypeVar('T')
+
+class ImageEncoder(Generic[T]):
     def __init__(self):
         self.cadena_imagen = ""
         self.cadena_base64 = ""
@@ -41,7 +44,7 @@ class ImageEncoder:
         except Exception as e:
             print(f"Ocurrió un error al guardar la imagen: {e}")
 
-    def fragmentar_payload(self, base64_data, id_imagen):
+    def fragmentar_payload(self, base64_data : str, id_imagen: T):
         partes = []
         index = 0
 

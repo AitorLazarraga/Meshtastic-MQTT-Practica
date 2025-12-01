@@ -23,7 +23,7 @@ class VerMap(tk.Toplevel):
         control_frame.pack(fill=tk.X, padx=5, pady=5)
 
         ttk.Button(control_frame, text="Recargar Posiciones", 
-                   command=self.reload_positions).pack(side=tk.LEFT, padx=5)
+                   command=self.crear_markers).pack(side=tk.LEFT, padx=5)
         ttk.Button(control_frame, text="Centrar Mapa", 
                    command=self.center_map).pack(side=tk.LEFT, padx=5)
         ttk.Button(control_frame, text="Limpiar Marcadores", 
@@ -47,7 +47,7 @@ class VerMap(tk.Toplevel):
         self.map_widget.set_position(43.2630, -2.9350)
         self.map_widget.set_zoom(12)
     
-        self.reload_positions()
+        self.crear_markers()
 
         self.auto_update()
 
@@ -74,7 +74,7 @@ class VerMap(tk.Toplevel):
             print(f"Error al leer el CSV de posiciones: {e}")
             return []
     
-    def reload_positions(self):
+    def crear_markers(self):
         self.clear_markers()
         posiciones = self.cargar_csv()
         for i, (lat, lon, alt)in enumerate(posiciones):
@@ -136,5 +136,5 @@ class VerMap(tk.Toplevel):
     
     def auto_update(self):
         """Actualiza el mapa automáticamente cada 10 segundos"""
-        self.reload_positions()
+        self.crear_markers()
         self.after(10000, self.auto_update)

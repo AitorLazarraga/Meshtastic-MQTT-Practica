@@ -107,6 +107,8 @@ class GUI:
                 self.pestana_mensajes  # Para poder agregar mensajes del sistema
             )
             
+            self.mapa = VerMap(self.notebook)
+            self.mapa.cargar_csv()
         
 
         # Barra de estado

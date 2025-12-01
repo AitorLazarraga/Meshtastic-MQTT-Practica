@@ -25,7 +25,12 @@ class ProcesarMensajes(ABC):
         pass
 
 
-class ProcesarPosicion(ProcesarMensajes):
+class LogMixin:
+    def log(self, tipo, payload):
+        print(f"Ha llegado un mensaje del tipo {tipo}")
+        print(f"La payload es {payload}")
+
+class ProcesarPosicion(ProcesarMensajes, LogMixin):
     
     def procesar_mensaje(self, mensaje):
         """Procesa mensajes de posición"""
@@ -56,6 +61,7 @@ class ProcesarPosicion(ProcesarMensajes):
         
         self.n_mensaje += 1
         mensaje_pos = f"Hora {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')} - Posición recibida de {nom}: Lat: {lat}, Lon: {lon}, Alt: {alt}m"
+        self.log('Posicional', mensaje_pos)
         self.mensajes[self.n_mensaje] = mensaje_pos
         self.ultimo_mensaje = mensaje_pos
         self.nuevos_mensajes.append(mensaje_pos)
@@ -76,7 +82,7 @@ class ProcesarPosicion(ProcesarMensajes):
         )
 
 
-class ProcesarTelemetria(ProcesarMensajes):
+class ProcesarTelemetria(ProcesarMensajes, LogMixin):
     
     def procesar_mensaje(self, mensaje):
         """Procesa mensajes de telemetría o nodeinfo"""
@@ -95,6 +101,7 @@ class ProcesarTelemetria(ProcesarMensajes):
         self.mensajes[self.n_mensaje] = pb_dict
         self.ultimo_mensaje = f"Mensaje de Telemetría recibido de {pb_dict.get('long_name', '¿?')}"
         self.nuevos_mensajes.append(pb_dict)
+        self.log('Telemetrico', pb_dict)
         
         if self.n_mensaje % 10 == 0:
             self.guardar_csv(self.mensajes)
@@ -112,7 +119,7 @@ class ProcesarTelemetria(ProcesarMensajes):
         print("Mensajes guardados y diccionario limpiado")
 
 
-class ProcesarTexto(ProcesarMensajes):
+class ProcesarTexto(ProcesarMensajes, LogMixin):
     
     def __init__(self, receiver_instance):
         super().__init__(receiver_instance)
@@ -133,8 +140,8 @@ class ProcesarTexto(ProcesarMensajes):
             self.id_actual = pb_dict.get("ID")
             self.partes_esperadas = pb_dict.get("Total_parts")
             self.partes_imagen.append(pb_dict)
-            
-            # CORRECCIÓN: Sincronizar con receiver para que la GUI pueda leer estos valores
+            self.log('Imagen', pb_dict)
+
             self.receiver.flag_imagen = True
             self.receiver.partes_imagen = self.partes_imagen
             self.receiver.partes_esperadas = self.partes_esperadas
@@ -175,6 +182,7 @@ class ProcesarTexto(ProcesarMensajes):
             return
 
         pb_con_hora = f"Hora {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')} {pb} recibido de {nombreper}"
+        self.log('Texto', pb_con_hora)
         self.mensajes[self.n_mensaje] = pb_con_hora
         self.ultimo_mensaje = pb_con_hora
         self.nuevos_mensajes.append(pb_con_hora)

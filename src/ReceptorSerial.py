@@ -18,10 +18,12 @@ class ReceptorSerial:
         self.serial = None
         self.conectado = False
         self.puertoE = '/dev/ttyUSB0'  # Puerto para enviar comandos (si es diferente)
-        self.palabrasDesp = ['DESPEGUE', 'ARRIBA', 'VOLAR', 'SUBIR', 'ELEVAR', 'DESPEGAR']
-        self.palabrasAterrizaje = ['ATERRIZAJE', 'ABAJO', 'BAJAR', 'DESCENDER', 'ATERRIZAR', 'SUELO', 'BAJA']
+        self.palabrasDesp = ['DESPEGUE', 'ARRIBA', 'VOLAR', 'DESPEGAR']
+        self.palabrasAterrizaje = ['ATERRIZAJE', 'ABAJO', 'ATERRIZAR', 'SUELO', 'BAJA']
         self.palabrasMov = ['ADELANTE', 'ATRAS', 'IZQUIERDA', 'DERECHA', 'FRENTE', 'RETROCEDER', 'LEFT', 'RIGHT', 'FORWARD', 'BACKWARD']
         self.palabrasCamara = ['FOTO', 'IMAGEN', 'CAPTURA', 'PICTURE', 'PHOTO', 'SNAP', 'IMAGE']
+        self.palabrasGiro = ['GIRAR', 'ROTAR', 'VOLTEAR', 'VIRAR', 'RODAR', 'TURN', 'SPIN', 'TWIST', 'ROTATE']
+        self.palabrasAltura = ['SUBIR', 'ELEVATE', 'LIFT', 'ELEVAR', 'ASCENDER', 'ALZAR', 'DOWN', 'BAJAR', 'DESCENDER', 'LOWER']
         self.condron = None
 
         self.contacto = Contactos()
@@ -163,15 +165,42 @@ class ReceptorSerial:
                     self.ultimo_mensaje = "🛬"
                     self.nuevos_mensajes.append("🛬")
 
+                elif texto_msg.upper() in self.palabrasGiro:
+                    self.condron.rotar()
+                    self.mensajes[self.n_mensaje] += "🔄"
+                    self.ultimo_mensaje = "🔄"
+                    self.nuevos_mensajes.append("🔄")
+
+                elif texto_msg.upper() in self.palabrasAltura:
+                    
+                    if texto_msg.upper() in ["SUBIR", "ELEVATE", "LIFT", "ASCENDER", "ALZAR"]:
+                        self.condron.subir()
+                        self.mensajes[self.n_mensaje] += "⬆️"
+                        self.ultimo_mensaje = "⬆️"
+                        self.nuevos_mensajes.append("⬆️")
+                    
+                    elif texto_msg.upper() in ["BAJAR", "DESCENDER", "LOWER", "DOWN"]:
+                        
+                        self.condron.bajar()
+                        self.mensajes[self.n_mensaje] += "⬇️"
+                        self.ultimo_mensaje = "⬇️"
+                        self.nuevos_mensajes.append("⬇️")
+                    
+
                 elif texto_msg.upper() in self.palabrasMov:
+                    
                     if texto_msg.upper() in ["ADELANTE", "FRENTE", "FORWARD"]:
                         self.condron.adelante()
+                    
                     elif texto_msg.upper() in ["ATRAS", "RETROCEDER", "BACKWARD"]:
                         self.condron.atras()
+                    
                     elif texto_msg.upper() in ["IZQUIERDA", "LEFT"]:
                         self.condron.mov_izda()
+                    
                     elif texto_msg.upper() in ["DERECHA", "RIGHT"]:
                         self.condron.mov_dcha()
+                    
                     self.mensajes[self.n_mensaje] += "🛩️"
                     self.ultimo_mensaje = "🛩️"
                     self.nuevos_mensajes.append("🛩️")

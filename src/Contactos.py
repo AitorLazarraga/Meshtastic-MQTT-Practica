@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from typing import Optional
 
 class Contactos:
     def __init__(self):
@@ -47,7 +48,7 @@ class Contactos:
         for _, fila in self.lista_contactos.iterrows():
             print(f"ID: {fila['ID']} - Nombre: {fila['Nombre']}")
 
-    def elegir_contacto(self, nombre):
+    def elegir_contacto(self, nombre: str) -> Optional[str]:
         """Busca y devuelve un contacto por nombre."""
         nombre = nombre.lower()
         self.lista_contactos = pd.read_csv(self.rutapag, converters={
@@ -63,7 +64,7 @@ class Contactos:
             contacto = resultado.iloc[0].to_dict()
             return contacto["ID"]
         
-    def contactoNum(self, numero):
+    def contactoNum(self, numero:int | str) -> Optional[str]:
         numero = str(numero)
         self.lista_contactos = pd.read_csv(self.rutapag, dtype={"ID": str, "Nombre": str})
 
